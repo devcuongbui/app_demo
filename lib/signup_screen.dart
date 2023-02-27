@@ -8,7 +8,24 @@ class SignupScreen extends StatefulWidget {
 }
 
 class _SignupScreenState extends State<SignupScreen> {
-  // late File _imageFile;
+  late File _imageFile;
+
+  @override
+  void initState() {
+    super.initState();
+    _imageFile = File('assets/images/avatar.jpg');
+  }
+
+  Future<void> _pickImage() async {
+    final pickedFile =
+        await ImagePicker().pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _imageFile = File(pickedFile.path);
+      });
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -19,23 +36,16 @@ class _SignupScreenState extends State<SignupScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // InkWell(
-            //     // onTap: () async {
-            //     //   final pickedFile =
-            //     //       await ImagePicker().getImage(source: ImageSource.gallery);
-            //     //   if (pickedFile != null) {
-            //     //     setState(() {
-            //     //       _imageFile = File(pickedFile.path);
-            //     //     });
-            //     //   }
-            //     // },
-            //     // child: CircleAvatar(
-            //     //   radius: 50,
-            //     //   backgroundImage:
-            //     //       _imageFile != null ? FileImage(_imageFile) : null,
-            //     //   child: _imageFile == null ? Icon(Icons.person) : null,
-            //     // ),
-            //     ),
+            InkWell(
+              onTap: _pickImage,
+              child: CircleAvatar(
+                radius: 50,
+                backgroundImage:
+                    _imageFile != null ? FileImage(_imageFile) : null,
+                child: _imageFile == null ? Icon(Icons.person) : null,
+              ),
+            ),
+            SizedBox(height: 20),
             TextFormField(
               decoration: InputDecoration(
                 labelText: 'Name',
