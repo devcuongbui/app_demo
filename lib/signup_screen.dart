@@ -13,7 +13,7 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   void initState() {
     super.initState();
-    _imageFile = File('assets/images/avatar.jpg');
+    _imageFile = File('');
   }
 
   Future<void> _pickImage() async {

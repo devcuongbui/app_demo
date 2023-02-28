@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'signup_screen.dart';
 import 'forgot_password.dart';
-import 'board_screen.dart';
+import 'board_manager.dart';
 
 class LoginScreen extends StatelessWidget {
   @override

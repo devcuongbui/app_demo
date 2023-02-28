@@ -1,81 +1,86 @@
 import 'package:flutter/material.dart';
 
-class Board extends StatelessWidget {
+class BoardScreen extends StatefulWidget {
+  @override
+  _BoardScreenState createState() => _BoardScreenState();
+}
+
+class _BoardScreenState extends State<BoardScreen> {
+  List<Map<String, dynamic>> _boardList = [
+    {
+      'name': 'Board 1',
+      'creator': 'John Doe',
+      'dateCreated': '2022-02-14',
+      'expirationDate': '2022-03-14',
+    },
+    {
+      'name': 'Board 2',
+      'creator': 'Jane Smith',
+      'dateCreated': '2022-02-15',
+      'expirationDate': '2022-03-15',
+    },
+    {
+      'name': 'Board 3',
+      'creator': 'Bob Johnson',
+      'dateCreated': '2022-02-16',
+      'expirationDate': '2022-03-16',
+    },
+  ];
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: TextField(
-          decoration: InputDecoration(
-            hintText: 'Search boards',
-            border: InputBorder.none,
-            hintStyle: TextStyle(color: Colors.white70),
-          ),
-        ),
-        actions: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: CircleAvatar(
-              child: Text('AB'),
-            ),
-          ),
-        ],
-      ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.only(top: 8.0, left: 16.0),
-            child: Text(
-              'Hello, Alice',
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 20.0,
+      body: ListView.separated(
+        itemBuilder: (BuildContext context, int index) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding:
+                    const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _boardList[index]['name'],
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'Created by ${_boardList[index]['creator']} on ${_boardList[index]['dateCreated']}',
+                      style: TextStyle(color: Colors.grey[600]),
+                    ),
+                    SizedBox(height: 8),
+                    Text(
+                      'Expires on ${_boardList[index]['expirationDate']}',
+                      style: TextStyle(color: Colors.grey[600]),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ),
-          SizedBox(height: 8.0),
-          Expanded(
-            child: ListView.separated(
-              separatorBuilder: (context, index) => Divider(),
-              itemCount: 3,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text('Board ${index + 1}'),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-      bottomNavigationBar: BottomNavigationBar(
-        type: BottomNavigationBarType.fixed,
-        items: [
-          BottomNavigationBarItem(
-            icon: Icon(Icons.dashboard),
-            label: 'Boards',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.credit_card),
-            label: 'My Cards',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.search),
-            label: 'Search',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.notifications),
-            label: 'Notifications',
-          ),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.person),
-            label: 'Account',
-          ),
-        ],
-      ),
-      floatingActionButton: FloatingActionButton(
-        onPressed: () {},
-        child: Icon(Icons.add),
+              Divider(
+                color: Colors.grey[300],
+                height: 1,
+                thickness: 1,
+                indent: 24,
+                endIndent: 24,
+              ),
+            ],
+          );
+        },
+        separatorBuilder: (BuildContext context, int index) {
+          return Divider(
+            color: Colors.grey[300],
+            height: 1,
+            thickness: 1,
+            indent: 24,
+            endIndent: 24,
+          );
+        },
+        itemCount: _boardList.length,
       ),
     );
   }
