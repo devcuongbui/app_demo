@@ -12,7 +12,8 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  List<dynamic> userList = [];
+  final passwordFocusNode = FocusNode();
+  Map<String, dynamic> userList = {};
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
@@ -22,57 +23,68 @@ class _LoginScreenState extends State<LoginScreen> {
     getUserList();
   }
 
-  Future<List<dynamic>> getUserList() async {
+  Future<Map<String, dynamic>> getUserList() async {
+    // Change this line
     final response =
-        await http.get(Uri.parse('http://10.0.2.2/api/getAccount'));
+        await http.get(Uri.parse('http://10.0.2.2:8010/api/getAccount'));
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      setState(() {
+        userList = jsonDecode(response.body);
+      });
+      return userList;
     } else {
       throw Exception('Failed to load user list');
     }
 
     // Add a return statement here to avoid the warning
-    return [];
+    return {};
   }
 
   bool validateUser(String email, String password) {
-    for (var user in userList) {
-      if (user['email'] == email && user['password'] == password) {
+    List<dynamic> users = jsonDecode(userList['Data']);
+
+    for (var user in users) {
+      if (email == user['Username'] && password == user['Password']) {
         return true;
       }
     }
+
     return false;
   }
 
-  void handleLogin() {
-    String email = emailController.text;
-    String password = passwordController.text;
-    if (validateUser(email, password)) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(
-          builder: (context) => Board(),
-        ),
-      );
-    } else {
-      // Show error message
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: Text('Invalid Credentials'),
-          content: Text('The email or password you entered is incorrect.'),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: Text('OK'),
-            ),
-          ],
-        ),
-      );
-    }
+void handleLogin() {
+  String email = emailController.text;
+  String password = passwordController.text;
+  if (email.isNotEmpty &&
+      password.isNotEmpty &&
+      validateUser(email, password)) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) => Board(),
+      ),
+    );
+  } else {
+    // Show error message
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Invalid Credentials'),
+        content: Text('The username or password you entered is incorrect.'),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              passwordController.clear(); // clear password input
+              passwordFocusNode.requestFocus(); // move focus back to password field
+            },
+            child: Text('OK'),
+          ),
+        ],
+      ),
+    );
   }
+}
 
   @override
   Widget build(BuildContext context) {
@@ -90,13 +102,14 @@ class _LoginScreenState extends State<LoginScreen> {
             TextFormField(
               controller: emailController,
               decoration: InputDecoration(
-                labelText: 'Email',
+                labelText: 'Username',
                 border: OutlineInputBorder(),
               ),
             ),
             SizedBox(height: 20),
             TextFormField(
               controller: passwordController,
+              focusNode: passwordFocusNode,
               decoration: InputDecoration(
                 labelText: 'Password',
                 border: OutlineInputBorder(),
@@ -107,14 +120,7 @@ class _LoginScreenState extends State<LoginScreen> {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => Board(),
-                    ),
-                  );
-                },
+                onPressed: handleLogin,
                 child: Text('Log In'),
                 style: ButtonStyle(
                   backgroundColor: MaterialStateProperty.resolveWith<Color>(
