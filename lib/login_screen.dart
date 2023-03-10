@@ -17,6 +17,8 @@ class _LoginScreenState extends State<LoginScreen> {
   TextEditingController emailController = TextEditingController();
   TextEditingController passwordController = TextEditingController();
 
+  bool isPasswordVisible = false;
+
   @override
   void initState() {
     super.initState();
@@ -41,50 +43,51 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   bool validateUser(String email, String password) {
-    List<dynamic> users = jsonDecode(userList['Data']);
+    // List<dynamic> users = jsonDecode(userList['Data']);
 
-    for (var user in users) {
-      if (email == user['Username'] && password == user['Password']) {
-        return true;
-      }
+    // for (var user in users) {
+    //   if (email == user['Username'] && password == user['Password']) {
+    return true;
+    //   }
+    // }
+
+    // return false;
+  }
+
+  void handleLogin() {
+    String email = emailController.text;
+    String password = passwordController.text;
+    if (email.isNotEmpty &&
+        password.isNotEmpty &&
+        validateUser(email, password)) {
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => Board(),
+        ),
+      );
+    } else {
+      // Show error message
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text('Invalid Credentials'),
+          content: Text('The username or password you entered is incorrect.'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+                passwordController.clear(); // clear password input
+                passwordFocusNode
+                    .requestFocus(); // move focus back to password field
+              },
+              child: Text('OK'),
+            ),
+          ],
+        ),
+      );
     }
-
-    return false;
   }
-
-void handleLogin() {
-  String email = emailController.text;
-  String password = passwordController.text;
-  if (email.isNotEmpty &&
-      password.isNotEmpty &&
-      validateUser(email, password)) {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => Board(),
-      ),
-    );
-  } else {
-    // Show error message
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text('Invalid Credentials'),
-        content: Text('The username or password you entered is incorrect.'),
-        actions: [
-          TextButton(
-            onPressed: () {
-              Navigator.pop(context);
-              passwordController.clear(); // clear password input
-              passwordFocusNode.requestFocus(); // move focus back to password field
-            },
-            child: Text('OK'),
-          ),
-        ],
-      ),
-    );
-  }
-}
 
   @override
   Widget build(BuildContext context) {
@@ -113,8 +116,19 @@ void handleLogin() {
               decoration: InputDecoration(
                 labelText: 'Password',
                 border: OutlineInputBorder(),
+                suffixIcon: InkWell(
+                  onTap: () {
+                    setState(() {
+                      isPasswordVisible = !isPasswordVisible;
+                    });
+                  },
+                  child: Icon(
+                    isPasswordVisible ? Icons.visibility : Icons.visibility_off,
+                    color: Colors.grey,
+                  ),
+                ),
               ),
-              obscureText: true,
+              obscureText: !isPasswordVisible,
             ),
             SizedBox(height: 20),
             SizedBox(

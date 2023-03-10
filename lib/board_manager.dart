@@ -1,3 +1,4 @@
+import 'package:demo/create_screen.dart';
 import 'package:flutter/material.dart';
 import 'account_screen.dart';
 import 'notification_screen.dart';
@@ -36,22 +37,38 @@ class _BoardState extends State<Board> {
           ? AppBar(
               automaticallyImplyLeading: false,
               title: _currentIndex == 0
-                  ? TextField(
-                      decoration: InputDecoration(
-                        hintText: 'Search boards',
-                        border: InputBorder.none,
-                        hintStyle: TextStyle(color: Colors.white70),
-                      ),
+                  ? Row(
+                      mainAxisAlignment: MainAxisAlignment.start,
+                      children: [
+                        SizedBox(width: 120),
+                        Image.asset(
+                          'assets/images/trello_logo.png',
+                          height: 28,
+                        ),
+                        SizedBox(width: 8),
+                        Text(
+                          'My App',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        SizedBox(width: 92),
+                        IconButton(
+                          icon: Icon(Icons.add),
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => CreateScreen(),
+                              ),
+                            );
+                          },
+                        ),
+                      ],
                     )
                   : Text(''),
-              actions: [
-                Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: CircleAvatar(
-                    child: Text('AB'),
-                  ),
-                ),
-              ],
+              actions: [],
             )
           : null,
       body: _children[_currentIndex],

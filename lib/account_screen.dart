@@ -16,10 +16,6 @@ class AccountScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const SizedBox(height: 24),
-            CircleAvatar(
-              radius: 64,
-              backgroundImage: AssetImage('assets/images/avatar.jpg'),
-            ),
             const SizedBox(height: 8),
             const Text(
               'Full Name',

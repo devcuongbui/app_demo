@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'create_screen.dart';
 
 class BoardScreen extends StatefulWidget {
   @override
@@ -6,81 +9,166 @@ class BoardScreen extends StatefulWidget {
 }
 
 class _BoardScreenState extends State<BoardScreen> {
-  List<Map<String, dynamic>> _boardList = [
-    {
-      'name': 'Board 1',
-      'creator': 'John Doe',
-      'dateCreated': '2022-02-14',
-      'expirationDate': '2022-03-14',
-    },
-    {
-      'name': 'Board 2',
-      'creator': 'Jane Smith',
-      'dateCreated': '2022-02-15',
-      'expirationDate': '2022-03-15',
-    },
-    {
-      'name': 'Board 3',
-      'creator': 'Bob Johnson',
-      'dateCreated': '2022-02-16',
-      'expirationDate': '2022-03-16',
-    },
-  ];
+  late Future<List<Map<String, dynamic>>> _boardListFuture;
+  bool _isHovered = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _boardListFuture = _fetchBoardList();
+  }
+
+  Future<List<Map<String, dynamic>>> _fetchBoardList() async {
+    final response =
+        await http.get(Uri.parse('http://10.0.2.2:8010/api/getboards'));
+    if (response.statusCode == 200) {
+      return List<Map<String, dynamic>>.from([jsonDecode(response.body)])
+          .toList();
+    } else {
+      throw Exception('Failed to load board list');
+    }
+  }
+
+  Color _getLabelColor(String label) {
+    switch (label.toLowerCase()) {
+      case 'green':
+        return Colors.green;
+      case 'red':
+        return Colors.red;
+      case 'blue':
+        return Colors.blue;
+      case 'orange':
+        return Colors.orange;
+      case 'white':
+        return Colors.white;
+      default:
+        return Colors.grey;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ListView.separated(
-        itemBuilder: (BuildContext context, int index) {
-          return Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Padding(
-                padding:
-                    const EdgeInsets.symmetric(vertical: 16, horizontal: 24),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _boardList[index]['name'],
-                      style: TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    SizedBox(height: 8),
-                    Text(
-                      'Created by ${_boardList[index]['creator']} on ${_boardList[index]['dateCreated']}',
-                      style: TextStyle(color: Colors.grey[600]),
-                    ),
-                    SizedBox(height: 8),
-                    Text(
-                      'Expires on ${_boardList[index]['expirationDate']}',
-                      style: TextStyle(color: Colors.grey[600]),
-                    ),
-                  ],
+      body: Column(
+        children: [
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16),
+            child: TextField(
+              decoration: InputDecoration(
+                hintText: 'Enter board name',
+                contentPadding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
                 ),
+                border: OutlineInputBorder(
+                  borderSide: BorderSide.none,
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                filled: true,
+                fillColor: Colors.grey[200],
+                suffixIcon: Icon(Icons.search),
               ),
-              Divider(
-                color: Colors.grey[300],
-                height: 1,
-                thickness: 1,
-                indent: 24,
-                endIndent: 24,
-              ),
-            ],
-          );
-        },
-        separatorBuilder: (BuildContext context, int index) {
-          return Divider(
-            color: Colors.grey[300],
-            height: 1,
-            thickness: 1,
-            indent: 24,
-            endIndent: 24,
-          );
-        },
-        itemCount: _boardList.length,
+            ),
+          ),
+          Expanded(
+            child: FutureBuilder<List<Map<String, dynamic>>>(
+              future: _boardListFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('Error loading data'));
+                } else {
+                  List<Map<String, dynamic>> boardList = snapshot.data!;
+                  String boardName = boardList[0]["Data"];
+                  List<Map<String, dynamic>> mapList =
+                      List<Map<String, dynamic>>.from(jsonDecode(boardName));
+                  return ListView.separated(
+                    itemBuilder: (BuildContext context, int index) {
+                      // Set the same color for the label and bottom container
+                      Color labelColor =
+                          _getLabelColor(mapList[index]['Labels']);
+                      return GestureDetector(
+                        onTap: () {
+                          // Handle item click
+                        },
+                        child: Container(
+                          width: double.infinity,
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                            color: Colors.white,
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.grey.withOpacity(0.3),
+                                blurRadius: 4,
+                                offset: Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Padding(
+                                padding: const EdgeInsets.symmetric(
+                                    vertical: 16, horizontal: 24),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Row(
+                                      children: [
+                                        Container(
+                                          width: 20,
+                                          height: 20,
+                                          margin: EdgeInsets.only(right: 8),
+                                          decoration: BoxDecoration(
+                                            color: labelColor,
+                                            borderRadius:
+                                                BorderRadius.circular(4),
+                                          ),
+                                        ),
+                                        Text(
+                                          mapList[index]['BoardName']
+                                              .replaceAll("_", "-"),
+                                          style: TextStyle(
+                                            fontSize: 20,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    SizedBox(height: 8),
+                                    Text(
+                                      'Created by ${mapList[index]['CreatedDate']}',
+                                      style: TextStyle(color: Colors.grey[600]),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              Container(
+                                height: 8,
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.only(
+                                    bottomLeft: Radius.circular(8),
+                                    bottomRight: Radius.circular(8),
+                                  ),
+                                  color: Colors.grey[200],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                    separatorBuilder: (BuildContext context, int index) {
+                      return SizedBox(height: 16);
+                    },
+                    itemCount: mapList.length,
+                  );
+                }
+              },
+            ),
+          ),
+        ],
       ),
     );
   }
