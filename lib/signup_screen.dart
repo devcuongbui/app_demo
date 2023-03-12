@@ -15,7 +15,8 @@ class _SignupScreenState extends State<SignupScreen> {
   @override
   void initState() {
     super.initState();
-    _imageFile = File('');
+    _imageFile = File(
+        '/data/user/0/com.example.demo/cache/a18fddf6-d830-4edc-9fc9-8010c84e9130/images.jpeg');
   }
 
   Future<void> _pickImage() async {

@@ -1,3 +1,4 @@
+import 'package:demo/list_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
@@ -90,7 +91,12 @@ class _BoardScreenState extends State<BoardScreen> {
                           _getLabelColor(mapList[index]['Labels']);
                       return GestureDetector(
                         onTap: () {
-                          // Handle item click
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => ListScreen(
+                                    BoardName: 'Công việc ở công ty')),
+                          );
                         },
                         child: Container(
                           width: double.infinity,
@@ -136,9 +142,10 @@ class _BoardScreenState extends State<BoardScreen> {
                                         ),
                                       ],
                                     ),
-                                    SizedBox(height: 8),
+                                    SizedBox(width: 8),
                                     Text(
-                                      'Created by ${mapList[index]['CreatedDate']}',
+                                      mapList[index]['CreatedDate']
+                                          .substring(0, 10),
                                       style: TextStyle(color: Colors.grey[600]),
                                     ),
                                   ],

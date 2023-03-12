@@ -1,3 +1,4 @@
+import 'package:demo/login_screen.dart';
 import 'package:flutter/material.dart';
 
 class AccountScreen extends StatelessWidget {
@@ -16,6 +17,11 @@ class AccountScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             const SizedBox(height: 24),
+            CircleAvatar(
+              backgroundImage: AssetImage('assets/images/avatar_user1.jpg'),
+              radius: 50,
+            ),
+            const SizedBox(height: 8),
             const SizedBox(height: 8),
             const Text(
               'Full Name',
@@ -174,7 +180,14 @@ class AccountScreen extends StatelessWidget {
                     border: Border.all(color: Colors.black),
                   ),
                   child: ElevatedButton(
-                    onPressed: () {},
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => LoginScreen(),
+                        ),
+                      );
+                    },
                     style: ElevatedButton.styleFrom(
                       primary: Colors.transparent,
                       elevation: 0,

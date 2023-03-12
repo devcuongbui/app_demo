@@ -1,8 +1,10 @@
 import 'package:demo/create_screen.dart';
 import 'package:flutter/material.dart';
+
 import 'login_screen.dart';
 import 'my_cards_screen.dart';
 import 'board_screen.dart';
+import 'list_screen.dart';
 
 void main() {
   runApp(const MyApp());
@@ -11,11 +13,13 @@ void main() {
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
+      debugShowCheckedModeBanner: false,
       theme: ThemeData(
         // This is the theme of your application.
         //
