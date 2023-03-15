@@ -2,7 +2,9 @@ import 'package:demo/list_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'dart:ui';
 import 'create_screen.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 class BoardScreen extends StatefulWidget {
   @override
@@ -47,6 +49,10 @@ class _BoardScreenState extends State<BoardScreen> {
     }
   }
 
+  AssetImage _getImageLabel(String imagePath) {
+    return AssetImage(imagePath);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -86,9 +92,9 @@ class _BoardScreenState extends State<BoardScreen> {
                       List<Map<String, dynamic>>.from(jsonDecode(boardName));
                   return ListView.separated(
                     itemBuilder: (BuildContext context, int index) {
-                      // Set the same color for the label and bottom container
                       Color labelColor =
-                          _getLabelColor(mapList[index]['Labels']);
+                          _getLabelColor(mapList[index]['LabelsColor']);
+                      // Set the same color for the label and bottom container
                       return GestureDetector(
                         onTap: () {
                           Navigator.push(
@@ -99,10 +105,8 @@ class _BoardScreenState extends State<BoardScreen> {
                           );
                         },
                         child: Container(
-                          width: double.infinity,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(8),
-                            color: Colors.white,
                             boxShadow: [
                               BoxShadow(
                                 color: Colors.grey.withOpacity(0.3),
@@ -111,9 +115,25 @@ class _BoardScreenState extends State<BoardScreen> {
                               ),
                             ],
                           ),
+                          // add image to the label and bottom container
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              Container(
+                                width: double.infinity,
+                                height: 100,
+                                decoration: BoxDecoration(
+                                  image: DecorationImage(
+                                    image: _getImageLabel(
+                                        'assets/images/background/background_${mapList[index]['Labels']}.jpg'),
+                                    fit: BoxFit.cover,
+                                  ),
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(8),
+                                    topRight: Radius.circular(8),
+                                  ),
+                                ),
+                              ),
                               Padding(
                                 padding: const EdgeInsets.symmetric(
                                     vertical: 16, horizontal: 24),

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:intl/intl.dart';
 
 class NotificationScreen extends StatefulWidget {
   @override
@@ -7,46 +10,48 @@ class NotificationScreen extends StatefulWidget {
 
 class _NotificationScreenState extends State<NotificationScreen> {
   String _selectedFilter = "All categories"; // initialize filter value
-  List<Map<String, dynamic>> _notifications = [
-    {
-      'id': 1,
-      'notification type': 'Unread',
-      'notificationMessage':
-          'Do_Xuan_Nam changed the expiration date of tag "tag 1" in table "Table 1", on Mar 11, 2023 at 15:49',
-      'notificationIcon':
-          Icons.table_chart_outlined, // icon for Unread notification type
-    },
-    {
-      'id': 2,
-      'notification type': 'All categories',
-      'notificationMessage':
-          'Do_Xuan_Nam changed the expiration date of tag "tag 1" in table "Table 1", on Mar 11, 2023 at 15:49',
-      'notificationIcon':
-          Icons.notifications, // icon for All categories notification type
-    },
-    {
-      'id': 3,
-      'notification type': 'Me',
-      'notificationMessage':
-          'Do_Xuan_Nam changed the expiration date of tag "tag 1" in table "Table 1", on Mar 11, 2023 at 15:49',
-      'notificationIcon': Icons.person, // icon for Me notification type
-    },
-    {
-      'id': 4,
-      'notification type': 'Comment',
-      'notificationMessage':
-          'Do_Xuan_Nam changed the expiration date of tag "tag 1" in table "Table 1", on Mar 11, 2023 at 15:49',
-      'notificationIcon': Icons.comment, // icon for Comment notification type
-    },
-    {
-      'id': 5,
-      'notification type': 'Comment',
-      'notificationMessage':
-          'Do_Xuan_Nam changed the expiration date of tag "tag 1" in table "Table 1", on Mar 11, 2023 at 15:49',
-      'notificationIcon':
-          Icons.table_chart_outlined, // icon for Comment notification type
-    },
-  ];
+  List<Map<String, dynamic>> _notifications = [];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchBoardList();
+  }
+
+  Future<void> _fetchBoardList() async {
+    final response =
+        await http.get(Uri.parse('http://10.0.2.2:8010/api/getNotifications'));
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      setState(() {
+        _notifications =
+            List<Map<String, dynamic>>.from(jsonDecode(data['Data']));
+      });
+    } else {
+      throw Exception('Failed to load board list');
+    }
+  }
+
+  List<Map<String, dynamic>> get filteredNotifications {
+    switch (_selectedFilter) {
+      case 'All categories':
+        return _notifications;
+      case 'Unread':
+        return _notifications
+            .where((notification) => notification['NotificationType'] == 1)
+            .toList();
+      case 'Me':
+        return _notifications
+            .where((notification) => notification['NotificationType'] == 3)
+            .toList();
+      case 'Comment':
+        return _notifications
+            .where((notification) => notification['NotificationType'] == 4)
+            .toList();
+      default:
+        return [];
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,7 +62,6 @@ class _NotificationScreenState extends State<NotificationScreen> {
           IconButton(
             icon: Icon(Icons.filter_list),
             onPressed: () {
-              // Show filter options
               showModalBottomSheet(
                 context: context,
                 builder: (BuildContext context) {
@@ -68,46 +72,45 @@ class _NotificationScreenState extends State<NotificationScreen> {
                           leading: Icon(Icons.markunread),
                           title: Text('Unread'),
                           onTap: () {
-                            // Handle selection
                             setState(() {
-                              _selectedFilter = "Unread";
+                              _selectedFilter = 'Unread';
                             });
                             Navigator.pop(context);
                           },
-                          selected: _selectedFilter == "Unread",
-                          trailing: _selectedFilter == "Unread"
-                              ? Icon(Icons.circle, color: Colors.red, size: 12)
-                              : null,
+                          selected: _selectedFilter == 'Unread',
                         ),
                         ListTile(
                           leading: Icon(Icons.category),
                           title: Text('All categories'),
                           onTap: () {
-                            // Handle selection
                             setState(() {
-                              _selectedFilter = "All categories";
+                              _selectedFilter = 'All categories';
                             });
                             Navigator.pop(context);
                           },
-                          selected: _selectedFilter == "All categories",
-                          trailing: _selectedFilter == "All categories"
-                              ? Icon(Icons.circle, color: Colors.red, size: 12)
-                              : null,
+                          selected: _selectedFilter == 'All categories',
                         ),
                         ListTile(
                           leading: Icon(Icons.person),
                           title: Text('Me'),
                           onTap: () {
-                            // Handle selection
                             setState(() {
-                              _selectedFilter = "Me";
+                              _selectedFilter = 'Me';
                             });
                             Navigator.pop(context);
                           },
-                          selected: _selectedFilter == "Me",
-                          trailing: _selectedFilter == "Me"
-                              ? Icon(Icons.circle, color: Colors.red, size: 12)
-                              : null,
+                          selected: _selectedFilter == 'Me',
+                        ),
+                        ListTile(
+                          leading: Icon(Icons.comment),
+                          title: Text('Comment'),
+                          onTap: () {
+                            setState(() {
+                              _selectedFilter = 'Comment';
+                            });
+                            Navigator.pop(context);
+                          },
+                          selected: _selectedFilter == 'Comment',
                         ),
                       ],
                     ),
@@ -119,36 +122,74 @@ class _NotificationScreenState extends State<NotificationScreen> {
         ],
       ),
       body: ListView.builder(
-        itemCount: _notifications.length,
+        itemCount: filteredNotifications.length,
         itemBuilder: (BuildContext context, int index) {
-          final notification = _notifications[index];
-          //check notification type and set corresponding icon
+          final notification = filteredNotifications[index];
           IconData iconData;
-          switch (notification['notification type']) {
-            case 'Unread':
+          switch (notification['NotificationType']) {
+            case 1:
               iconData = Icons.markunread;
               break;
-            case 'All categories':
+            case 2:
               iconData = Icons.notifications;
               break;
-            case 'Me':
+            case 3:
               iconData = Icons.person;
               break;
-            case 'Comment':
+            case 4:
               iconData = Icons.comment;
               break;
-            default:
-              iconData = Icons.notifications;
+            case 0:
+              iconData = Icons.notification_important;
               break;
+            default:
+              iconData = Icons.notification_important;
           }
-          return _selectedFilter == "All categories" ||
-                  _selectedFilter == notification['notification type']
-              ? ListTile(
-                  leading: Icon(iconData),
-                  title: Text(notification['notificationMessage']),
-                  subtitle: Text('Mar 11, 2023 at 15:49'),
-                )
-              : SizedBox.shrink();
+
+          return ListTile(
+            leading: Icon(iconData),
+            title: RichText(
+              text: TextSpan(
+                text: '${notification['Username']}',
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Color.fromARGB(255, 0, 0, 0),
+                ),
+                children: <TextSpan>[
+                  TextSpan(
+                    text: ' ${notification['Content']} ',
+                  ),
+                  TextSpan(
+                    text: '${notification['CardName']}',
+                    style: TextStyle(
+                      decoration: TextDecoration.underline,
+                      color: Color.fromARGB(255, 36, 24, 23),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                  TextSpan(
+                    text: ' của bảng ',
+                  ),
+                  TextSpan(
+                    text: '${notification['BoardName']}',
+                    style: TextStyle(
+                      decoration: TextDecoration.underline,
+                      color: Color.fromARGB(255, 46, 30, 28),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            subtitle: Text(
+              DateFormat("'vào ngày' d 'thg' M',' y 'lúc' HH:mm")
+                  .format(DateTime.parse(notification['CreatedDate'])),
+            ),
+            trailing: Text(""),
+            onTap: () {
+              //TODO:...
+            },
+          );
         },
       ),
     );

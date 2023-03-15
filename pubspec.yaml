@@ -32,6 +32,7 @@ dependencies:
     sdk: flutter
   image_picker: ^0.8.4+4
   intl: ^0.17.0
+  flutter_svg: ^0.22.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
@@ -55,6 +56,9 @@ dev_dependencies:
 flutter:
   assets:
     - assets/images/
+    - assets/images/background/
+    - assets/images/background/background_0.jpg
+    - assets/images/background/background_0.svg
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in

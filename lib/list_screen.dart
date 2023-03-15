@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:demo/card_detail_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -58,23 +59,71 @@ class _ListScreenState extends State<ListScreen> {
     ],
     'Phần mềm quản lý công nhân': [
       {
-        'CardName': 'Card 6',
+        'CardName': 'FrontEnd',
         'Label': 'Medium',
-        'ExpirationDate': '2022-09-30',
-        'Comments': 11,
-        'CheckedItems': 1,
-        'TotalItems': 3,
+        'ExpirationDate': '2023-12-31',
+        'Comments': 4,
+        'CheckedItems': 3,
+        'TotalItems': 5,
+      },
+      {
+        'CardName': 'Create Database',
+        'Label': 'Low',
+        'ExpirationDate': '2024-06-30',
+        'Comments': 3,
+        'CheckedItems': 2,
+        'TotalItems': 5,
+      },
+      {
+        'CardName': 'Create WebAPI',
+        'Label': 'High',
+        'ExpirationDate': '2024-06-30',
+        'Comments': 5,
+        'CheckedItems': 2,
+        'TotalItems': 4,
       },
 // ... more cards
     ],
     'App mobile quản lý công việc cá nhân': [
       {
-        'CardName': 'Card 11',
-        'Label': 'High',
-        'ExpirationDate': '2023-04-30',
+        'CardName': 'FrontEnd',
+        'Label': 'Medium',
+        'ExpirationDate': '2023-12-31',
         'Comments': 4,
-        'CheckedItems': 0,
-        'TotalItems': 2,
+        'CheckedItems': 3,
+        'TotalItems': 5,
+      },
+      {
+        'CardName': 'Create Database',
+        'Label': 'Low',
+        'ExpirationDate': '2024-06-30',
+        'Comments': 3,
+        'CheckedItems': 2,
+        'TotalItems': 5,
+      },
+      {
+        'CardName': 'Create WebAPI',
+        'Label': 'High',
+        'ExpirationDate': '2024-06-30',
+        'Comments': 5,
+        'CheckedItems': 2,
+        'TotalItems': 4,
+      },
+      {
+        'CardName': 'BackEnd',
+        'Label': 'High',
+        'ExpirationDate': '2024-06-30',
+        'Comments': 11,
+        'CheckedItems': 3,
+        'TotalItems': 4,
+      },
+      {
+        'CardName': 'BackEnd2',
+        'Label': 'High',
+        'ExpirationDate': '2024-06-30',
+        'Comments': 11,
+        'CheckedItems': 3,
+        'TotalItems': 4,
       },
 // ... more cards
     ],
@@ -87,7 +136,6 @@ class _ListScreenState extends State<ListScreen> {
     List<String> listNames = _cardLists.keys.toList();
     bool sortByIncreasing =
         true; // Default option is to sort by increasing expiration date
-
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.BoardName),
@@ -115,74 +163,106 @@ class _ListScreenState extends State<ListScreen> {
           IconButton(
             icon: Icon(Icons.add),
             onPressed: () {
-              // Navigate to the form to add a new list.
+// Navigate to the form to add a new list.
             },
           ),
         ],
       ),
-      body: Column(
-        children: [
-          Expanded(
-            child: PageView.builder(
-              onPageChanged: (index) {
-                setState(() {
-                  _currentPage = index;
-                });
-              },
-              itemBuilder: (context, index) {
-                String listName = listNames[index];
-                List<Map<String, dynamic>> cardList =
-                    _cardLists.values.toList()[index];
-                return _buildCardsList(listName, cardList);
-              },
-              itemCount: _cardLists.length,
-              controller: PageController(initialPage: _currentPage),
-            ),
+      body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/background/background_2.jpg'),
+            fit: BoxFit.cover,
           ),
-          if (_cardLists.isEmpty)
-            ElevatedButton(
-              onPressed: () {
-                // Navigate to the form to add a new list.
-              },
-              child: Text('Add New List'),
-            ),
-          SizedBox(
-            height: 48,
-            child: Center(
-              child: ListView.builder(
-                scrollDirection: Axis.horizontal,
-                itemCount: listNames.length,
-                itemBuilder: (BuildContext context, int index) {
-                  return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        _currentPage = index;
-                      });
-                    },
-                    child: Padding(
-                      padding: const EdgeInsets.symmetric(
-                          horizontal: 16, vertical: 8),
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.circle,
-                            color: _currentPage == index
-                                ? Theme.of(context).accentColor
-                                : Colors.grey,
-                            size: 12,
+        ),
+        child: Column(
+          children: [
+            Expanded(
+              child: PageView.builder(
+                onPageChanged: (index) {
+                  setState(() {
+                    _currentPage = index;
+                  });
+                },
+                itemBuilder: (context, index) {
+                  String listName = listNames[index];
+                  List<Map<String, dynamic>> cardList =
+                      _cardLists.values.toList()[index];
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: const EdgeInsets.all(8.0),
+                        child: Card(
+                          color: Theme.of(context).accentColor,
+                          child: Padding(
+                            padding: const EdgeInsets.all(8.0),
+                            child: Text(
+                              listName,
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontWeight: FontWeight.bold,
+                                fontSize: 20,
+                              ),
+                            ),
                           ),
-                          SizedBox(
-                            width: 8,
-                          ),
-                        ],
+                        ),
                       ),
-                    ),
+                      Expanded(
+                        child: _buildCardsList(listName, cardList),
+                      ),
+                    ],
                   );
                 },
+                itemCount: _cardLists.length,
+                controller: PageController(initialPage: _currentPage),
               ),
             ),
-          ),
-        ],
+            if (_cardLists.isEmpty)
+              ElevatedButton(
+                onPressed: () {
+// Navigate to the form to add a new list.
+                },
+                child: Text('Add New List'),
+              ),
+            SizedBox(
+              height: 48,
+              child: Center(
+                child: ListView.builder(
+                  scrollDirection: Axis.horizontal,
+                  itemCount: listNames.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return GestureDetector(
+                      onTap: () {
+                        setState(() {
+                          _currentPage = index;
+                        });
+                      },
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 8),
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.circle,
+                              color: _currentPage == index
+                                  ? Theme.of(context).accentColor
+                                  : Colors.grey,
+                              size: 12,
+                            ),
+                            SizedBox(
+                              width: 8,
+                            ),
+                          ],
+                        ),
+                      ),
+                    );
+                  },
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -213,13 +293,6 @@ class _ListScreenState extends State<ListScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(
-          listName,
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
         SizedBox(height: 16),
         Expanded(
           child: ListView.separated(
@@ -252,11 +325,24 @@ class _ListScreenState extends State<ListScreen> {
     );
   }
 
-  Widget _buildCard(String title, String label, DateTime? expirationDate,
-      int comments, int checkedItems, int totalItems, List<String> avatars) {
+  Widget _buildCard(
+    String title,
+    String label,
+    DateTime? expirationDate,
+    int comments,
+    int checkedItems,
+    int totalItems,
+    List<String> avatars,
+  ) {
     return GestureDetector(
       onTap: () {
         // Handle item click
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CardsDetailScreen('Front End'),
+          ),
+        );
       },
       child: Container(
         width: 150,
@@ -302,7 +388,7 @@ class _ListScreenState extends State<ListScreen> {
                   ),
                   SizedBox(width: 4),
                   Text(
-                    "",
+                    '',
                     style: TextStyle(
                       fontSize: 12,
                       color: Colors.grey,
@@ -360,7 +446,8 @@ class _ListScreenState extends State<ListScreen> {
                   avatars.length,
                   (index) => CircleAvatar(
                     radius: 10,
-                    backgroundImage: NetworkImage(avatars[index]),
+                    backgroundImage:
+                        AssetImage('assets/images/avatar_user1.jpg'),
                   ),
                 ),
               ),
