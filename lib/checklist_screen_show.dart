@@ -19,6 +19,8 @@ class _ChecklistScreenState extends State<ChecklistScreenShow> {
   final _itemNameFocusNode = FocusNode();
   bool _isAddingNewItem = false;
   String _checklistName = '';
+  bool _isEditingName = false;
+  bool? _isCheckedFilter = null;
 
   @override
   void initState() {
@@ -37,9 +39,69 @@ class _ChecklistScreenState extends State<ChecklistScreenShow> {
 
   @override
   Widget build(BuildContext context) {
+// Define a variable to store the filtered items
+    List<Map<String, dynamic>> filteredItems = [];
+    if (_isCheckedFilter == true) {
+      filteredItems = _items
+          .where((item) => item['isChecked'])
+          .toList(); // displays checked items only
+    } else if (_isCheckedFilter == false) {
+      filteredItems = _items
+          .where((item) => !item['isChecked'])
+          .toList(); // displays unchecked items only
+    } else {
+      filteredItems = List.from(_items); // displays all items
+    }
     return Scaffold(
       appBar: AppBar(
-        title: Text(_checklistName),
+// Display the checklist name as text or as an editable text field
+        title: _isEditingName
+            ? TextFormField(
+                initialValue: _checklistName,
+                autofocus: true,
+                onChanged: (value) {
+                  setState(() {
+                    _checklistName = value;
+                  });
+                },
+              )
+            : Text(_checklistName),
+        actions: [
+// Toggle between displaying the checklist name as text and as an editable text field
+          IconButton(
+            icon: _isEditingName ? Icon(Icons.check) : Icon(Icons.edit),
+            onPressed: () {
+              setState(() {
+                _isEditingName = !_isEditingName;
+              });
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.check_box_outline_blank),
+            onPressed: () {
+              setState(() {
+                _isCheckedFilter = false;
+              });
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.check_box),
+            onPressed: () {
+              setState(() {
+                _isCheckedFilter = true;
+              });
+            },
+          ),
+// Toggle between filtering and displaying only checked items, only unchecked items, or all items
+          IconButton(
+            icon: Icon(Icons.list),
+            onPressed: () {
+              setState(() {
+                _isCheckedFilter = null;
+              });
+            },
+          ),
+        ],
       ),
       body: SingleChildScrollView(
         padding: EdgeInsets.all(16.0),
@@ -47,15 +109,18 @@ class _ChecklistScreenState extends State<ChecklistScreenShow> {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             SizedBox(height: 8.0),
-            Text(
-              _checklistName,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                fontSize: 16.0,
+// Display the checklist name as text
+            if (!_isEditingName)
+              Text(
+                _checklistName,
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16.0,
+                ),
               ),
-            ),
             SizedBox(height: 8.0),
-            for (final item in _items)
+// Display the items based on the selected filter option
+            for (final item in filteredItems)
               _buildChecklistItem(_items.indexOf(item), item),
             SizedBox(height: 16.0),
             _buildAddNewItemRow(),
@@ -97,18 +162,66 @@ class _ChecklistScreenState extends State<ChecklistScreenShow> {
     bool isChecked = item['isChecked'] ?? false;
     return Padding(
       padding: EdgeInsets.only(bottom: 8.0),
-      child: Row(
-        children: [
-          Checkbox(
-            value: isChecked,
-            onChanged: (value) {
-              setState(() {
-                item['isChecked'] = value;
-              });
-            },
-          ),
-          Text('${item['name']}'),
-        ],
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            item['isEditable'] = true;
+          });
+        },
+        child: Row(
+          children: [
+            Checkbox(
+              value: isChecked,
+              onChanged: (value) {
+                setState(() {
+                  item['isChecked'] = value;
+                });
+              },
+            ),
+            Expanded(
+              child: item['isEditable'] == true
+                  ? Row(
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            initialValue: item['name'],
+                            autofocus: true,
+                            onChanged: (value) {
+                              setState(() {
+                                item['name'] = value;
+                              });
+                            },
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.done),
+                          onPressed: () {
+                            setState(() {
+                              item['isEditable'] = false;
+                            });
+                          },
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.delete),
+                          onPressed: () {
+                            setState(() {
+                              _items.removeAt(index);
+                            });
+                          },
+                        ),
+                      ],
+                    )
+                  : Text(
+                      '${item['name']}',
+                      style: isChecked
+                          ? TextStyle(
+                              decoration: TextDecoration.lineThrough,
+                            )
+                          : TextStyle(),
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -154,7 +267,7 @@ class _ChecklistScreenState extends State<ChecklistScreenShow> {
               ),
             ),
             IconButton(
-              icon: Icon(Icons.save),
+              icon: Icon(Icons.done),
               onPressed: () {
                 _addItem(_itemNameController.text);
               },

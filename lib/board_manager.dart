@@ -16,7 +16,7 @@ class _BoardState extends State<Board> {
   bool _showAppBar = true;
 
   final List<Widget> _children = [
-    BoardScreen(),
+    BoardScreen(backgroundImage_add: "5",boardColor_add: "blue",boardName_add: "Công việc mới",),
     MyCardsScreen(),
     SearchScreen(),
     NotificationScreen(),
