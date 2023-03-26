@@ -5,8 +5,48 @@ import 'my_cards_screen.dart';
 import 'board_screen.dart';
 import 'list_screen.dart';
 import 'card_detail_screen.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:logging/logging.dart';
+import "board_manager.dart";
 
-void main() {
+void main() async {
+  Logger.root.level = Level.ALL;
+  Logger.root.onRecord.listen((record) {
+    print('${record.level.name}: ${record.time}: ${record.message}');
+  });
+
+  Logger logger = Logger('myLogger');
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  FirebaseMessaging messaging = FirebaseMessaging.instance;
+  FirebaseMessaging.instance.subscribeToTopic('news').then((value) {
+    logger.info('Subscribed to topic news');
+  }).catchError((e) {
+    logger.info('Failed to subscribe to topic news: $e');
+  });
+  NotificationSettings settings = await messaging.requestPermission(
+    alert: true,
+    announcement: false,
+    badge: true,
+    carPlay: false,
+    criticalAlert: false,
+    provisional: false,
+    sound: true,
+  );
+  logger.info('User granted permission: ${settings.authorizationStatus}');
+  FirebaseMessaging.onMessage.listen((RemoteMessage message) {
+    logger.info('Got a message whilst in the foreground!');
+    logger.info('Message data: ${message.data}');
+
+    if (message.notification != null) {
+      logger.info(
+          'Message also contained a notification: ${message.notification}');
+    }
+  });
   runApp(const MyApp());
 }
 
@@ -31,7 +71,7 @@ class MyApp extends StatelessWidget {
         // is not restarted.
         primarySwatch: Colors.blue,
       ),
-      home: LoginScreen(),
+      home: Board(),
     );
   }
 }

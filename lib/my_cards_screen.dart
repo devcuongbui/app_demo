@@ -89,14 +89,14 @@ class _MyCardsScreenState extends State<MyCardsScreen> {
 
   Widget _buildCardsList() {
     List<Widget> cards = [
-      _buildCard('Card 1', 'green', DateTime.now().add(Duration(days: 3)), 2, 1,
-          3, _listAvatar),
-      _buildCard('Card 2', 'red', DateTime.now().add(Duration(days: 2)), 4, 5,
-          10, _listAvatar),
-      _buildCard('Card 3', 'yellow', DateTime.now().add(Duration(days: 2)), 4,
-          7, 10, _listAvatar),
-      _buildCard('Card 4', 'blue', DateTime.now().add(Duration(days: 2)), 4, 9,
-          10, _listAvatar)
+      _buildCard('Build Database', 'green',
+          DateTime.now().add(Duration(days: 3)), 2, 1, 3, _listAvatar),
+      _buildCard('Build Server', 'red', DateTime.now().add(Duration(days: 2)),
+          4, 5, 10, _listAvatar),
+      _buildCard('Build FrontEnd', 'yellow',
+          DateTime.now().add(Duration(days: 2)), 4, 7, 10, _listAvatar),
+      _buildCard('Build BackEnd', 'blue', DateTime.now().add(Duration(days: 2)),
+          4, 9, 10, _listAvatar)
     ];
 
     if (_filterByDate) {

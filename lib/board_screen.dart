@@ -10,12 +10,14 @@ class BoardScreen extends StatefulWidget {
   final String backgroundImage_add;
   final String boardName_add;
   final String boardColor_add;
+  final bool checkAdd;
 
   const BoardScreen(
       {Key? key,
       required this.backgroundImage_add,
       required this.boardName_add,
-      required this.boardColor_add})
+      required this.boardColor_add,
+      required this.checkAdd})
       : super(key: key);
   @override
   _BoardScreenState createState() => _BoardScreenState();
@@ -23,36 +25,40 @@ class BoardScreen extends StatefulWidget {
 
 class _BoardScreenState extends State<BoardScreen> {
   late Future<List<Map<String, dynamic>>> _boardListFuture;
-
   @override
   void initState() {
     super.initState();
     _boardListFuture = _fetchBoardList();
-    _addBoard(widget.backgroundImage_add, widget.boardName_add, widget.boardColor_add);
+    if (widget.checkAdd == true) {
+      _addBoard(widget.backgroundImage_add, widget.boardName_add,
+          widget.boardColor_add);
+    }
   }
 
-Future<void> _addBoard(String backgroundImage_add, String boardName_add, String boardColor_add) async {
-  final newBoard = {
-    'BoardID': 2,
-    'Description': 'New board description',
-    'LabelsColor': boardColor_add, // use boardColor_add parameter for LabelsColor
-    'Labels': 3,
-    'BoardName': boardName_add, // use boardName_add parameter for BoardName
-    'CreatedDate': '2021-08-16',
-    'BackgroundImage': backgroundImage_add // use backgroundImage_add parameter for BackgroundImage
-  };
+  Future<void> _addBoard(String backgroundImage_add, String boardName_add,
+      String boardColor_add) async {
+    final newBoard = {
+      'BoardID': 2,
+      'Description': 'New board description',
+      'LabelsColor':
+          boardColor_add, // use boardColor_add parameter for LabelsColor
+      'Labels': 3,
+      'BoardName': boardName_add, // use boardName_add parameter for BoardName
+      'CreatedDate': '2021-08-16',
+      'Labels':
+          backgroundImage_add // use backgroundImage_add parameter for BackgroundImage
+    };
 
-  final boardList = await _fetchBoardList();
-  boardList.add(newBoard);
-  final newData = boardList;
+    final boardList = await _fetchBoardList();
+    boardList.add(newBoard);
+    final newData = boardList;
 
-  await Future.delayed(Duration(seconds: 2)); // Simulate delay
+    await Future.delayed(Duration(seconds: 2)); // Simulate delay
 
-  setState(() {
-    _boardListFuture = Future.value(newData);
-  });
-}
-
+    setState(() {
+      _boardListFuture = Future.value(newData);
+    });
+  }
 
   Future<List<Map<String, dynamic>>> _fetchBoardList() async {
     final response =
@@ -130,16 +136,16 @@ Future<void> _addBoard(String backgroundImage_add, String boardName_add, String 
             ),
           ),
           Expanded(
-  child: FutureBuilder<List<Map<String, dynamic>>>(
-    future: _boardListFuture,
-    builder: (context, snapshot) {
-      if (snapshot.connectionState == ConnectionState.waiting) {
-        return Center(child: CircularProgressIndicator());
-      } else if (snapshot.hasError) {
-        return Center(child: Text('Error loading data'));
-      } else {
-        List<Map<String, dynamic>> boardList = snapshot.data!;
-        List<Map<String, dynamic>> mapList = boardList;
+            child: FutureBuilder<List<Map<String, dynamic>>>(
+              future: _boardListFuture,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return Center(child: CircularProgressIndicator());
+                } else if (snapshot.hasError) {
+                  return Center(child: Text('Error loading data'));
+                } else {
+                  List<Map<String, dynamic>> boardList = snapshot.data!;
+                  List<Map<String, dynamic>> mapList = boardList;
                   return ListView.separated(
                     itemBuilder: (BuildContext context, int index) {
                       Color labelColor =

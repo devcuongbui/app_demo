@@ -20,7 +20,7 @@ class _CreateScreenState extends State<CreateScreen>
   late List<String> _members;
   late List<String> _attachments;
   List<String> myStringList = ['string1', 'string2', 'string3'];
-  String _backgroundImage = 'background_0.jpg';
+  String _backgroundImage = "0";
   // TabController controller = TabController(length: 2, vsync: this);
 
   @override
@@ -122,7 +122,7 @@ class _CreateScreenState extends State<CreateScreen>
                     },
                     items: [
                       DropdownMenuItem<String>(
-                        value: 'background_0.jpg',
+                        value: '0',
                         child: BackgroundItem(
                           value: 'background_0.jpg',
                           text: 'Background 1',
@@ -130,7 +130,7 @@ class _CreateScreenState extends State<CreateScreen>
                         ),
                       ),
                       DropdownMenuItem<String>(
-                        value: 'background_1.jpg',
+                        value: '1',
                         child: BackgroundItem(
                           value: 'background_1.jpg',
                           text: 'Background 2',
@@ -138,7 +138,7 @@ class _CreateScreenState extends State<CreateScreen>
                         ),
                       ),
                       DropdownMenuItem<String>(
-                        value: 'background_2.jpg',
+                        value: '2',
                         child: BackgroundItem(
                           value: 'background_2.jpg',
                           text: 'Background 3',
@@ -146,7 +146,7 @@ class _CreateScreenState extends State<CreateScreen>
                         ),
                       ),
                       DropdownMenuItem<String>(
-                        value: 'background_3.jpg',
+                        value: '3',
                         child: BackgroundItem(
                           value: 'background_3.jpg',
                           text: 'Background 4',
@@ -154,10 +154,18 @@ class _CreateScreenState extends State<CreateScreen>
                         ),
                       ),
                       DropdownMenuItem<String>(
-                        value: 'background_9.jpg',
+                        value: '4',
+                        child: BackgroundItem(
+                          value: 'background_4.jpg',
+                          text: 'Background 5',
+                          image: 'background_4.jpg',
+                        ),
+                      ),
+                      DropdownMenuItem<String>(
+                        value: '9',
                         child: BackgroundItem(
                           value: 'background_9.jpg',
-                          text: 'Background 5',
+                          text: 'Background 6',
                           image: 'background_9.jpg',
                         ),
                       ),
@@ -170,9 +178,11 @@ class _CreateScreenState extends State<CreateScreen>
                         context,
                         MaterialPageRoute(
                           builder: (context) => BoardScreen(
-                              backgroundImage_add: _backgroundImage,
-                              boardName_add: _boardName,
-                              boardColor_add: _boardColor),
+                            backgroundImage_add: _backgroundImage,
+                            boardName_add: _boardName,
+                            boardColor_add: _boardColor,
+                            checkAdd: true,
+                          ),
                         ),
                       );
                     },
