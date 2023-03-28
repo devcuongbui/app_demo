@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'board_screen.dart';
 import 'background_item.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 
 class CreateScreen extends StatefulWidget {
   const CreateScreen({Key? key}) : super(key: key);
@@ -11,7 +13,8 @@ class CreateScreen extends StatefulWidget {
 
 class _CreateScreenState extends State<CreateScreen>
     with TickerProviderStateMixin {
-  late String _boardName;
+  late String _boardName = "test";
+  late int userID = 1;
   late String _boardColor;
   late String _cardName;
   late String _cardDescription;
@@ -22,6 +25,40 @@ class _CreateScreenState extends State<CreateScreen>
   List<String> myStringList = ['string1', 'string2', 'string3'];
   String _backgroundImage = "0";
   // TabController controller = TabController(length: 2, vsync: this);
+
+  Future<void> addBoard() async {
+    // get the current user ID or use a default value
+    // int userID = currentUser?.id ?? 1;
+
+    // create a new board object with data from form
+    BoardModel newBoard = BoardModel(
+      boardName: _boardName,
+      createdDate: DateTime.now(),
+      UserID: 1,
+      labels: _backgroundImage,
+      labelsColor: _boardColor,
+    );
+
+    // call the API to add the new board
+    final response = await http.post(
+      Uri.parse('http://10.0.2.2:8010/api/addBoard'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode(newBoard.toJson()),
+    );
+
+    // check if the request was successful
+    if (response.statusCode == 200) {
+      // show success message to the user
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Board added successfully!')),
+      );
+    } else {
+      // show error message to the user
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error adding board!')),
+      );
+    }
+  }
 
   @override
   void initState() {
@@ -174,15 +211,11 @@ class _CreateScreenState extends State<CreateScreen>
                   SizedBox(height: 16.0),
                   ElevatedButton(
                     onPressed: () {
+                      addBoard();
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => BoardScreen(
-                            backgroundImage_add: _backgroundImage,
-                            boardName_add: _boardName,
-                            boardColor_add: _boardColor,
-                            checkAdd: true,
-                          ),
+                          builder: (context) => BoardScreen(),
                         ),
                       );
                     },
@@ -346,4 +379,28 @@ class _CreateScreenState extends State<CreateScreen>
                       ]))
             ])));
   }
+}
+
+class BoardModel {
+  final String boardName;
+  final String labels;
+  final String labelsColor;
+  final String createdDate;
+  final int UserID;
+
+  BoardModel({
+    required this.boardName,
+    required this.labels,
+    required this.labelsColor,
+    DateTime? createdDate,
+    required this.UserID,
+  }) : createdDate = createdDate?.toIso8601String() ?? '';
+
+  Map<String, dynamic> toJson() => {
+        'BoardName': boardName,
+        'Labels': labels,
+        'LabelsColor': labelsColor,
+        'CreatedDate': createdDate,
+        'UserID': UserID,
+      };
 }

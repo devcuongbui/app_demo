@@ -5,88 +5,86 @@ import 'dart:convert';
 import 'dart:ui';
 import 'create_screen.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'board_manager.dart';
 
 class BoardScreen extends StatefulWidget {
-  final String backgroundImage_add;
-  final String boardName_add;
-  final String boardColor_add;
-  final bool checkAdd;
-
-  const BoardScreen(
-      {Key? key,
-      required this.backgroundImage_add,
-      required this.boardName_add,
-      required this.boardColor_add,
-      required this.checkAdd})
-      : super(key: key);
   @override
   _BoardScreenState createState() => _BoardScreenState();
 }
 
 class _BoardScreenState extends State<BoardScreen> {
+  String _searchKeyword = 'c';
   late Future<List<Map<String, dynamic>>> _boardListFuture;
+  List<Map<String, dynamic>> _searchResult = [];
   @override
   void initState() {
     super.initState();
     _boardListFuture = _fetchBoardList();
-    if (widget.checkAdd == true) {
-      _addBoard(widget.backgroundImage_add, widget.boardName_add,
-          widget.boardColor_add);
-    }
-  }
-
-  Future<void> _addBoard(String backgroundImage_add, String boardName_add,
-      String boardColor_add) async {
-    final newBoard = {
-      'BoardID': 2,
-      'Description': 'New board description',
-      'LabelsColor':
-          boardColor_add, // use boardColor_add parameter for LabelsColor
-      'Labels': 3,
-      'BoardName': boardName_add, // use boardName_add parameter for BoardName
-      'CreatedDate': '2021-08-16',
-      'Labels':
-          backgroundImage_add // use backgroundImage_add parameter for BackgroundImage
-    };
-
-    final boardList = await _fetchBoardList();
-    boardList.add(newBoard);
-    final newData = boardList;
-
-    await Future.delayed(Duration(seconds: 2)); // Simulate delay
-
-    setState(() {
-      _boardListFuture = Future.value(newData);
-    });
   }
 
   Future<List<Map<String, dynamic>>> _fetchBoardList() async {
     final response =
         await http.get(Uri.parse('http://10.0.2.2:8010/api/getboards'));
-
     if (response.statusCode == 200) {
       try {
         final data = jsonDecode(response.body)['Data'];
         final boardData = jsonDecode(data);
         List<dynamic> boardList = [];
-
         if (boardData is List) {
           boardList = boardData;
         } else if (boardData is Map) {
           boardList = [boardData];
         }
-
         final resultList = boardList
             .map((board) =>
                 Map<String, dynamic>.from(board as Map<String, dynamic>))
             .toList();
-
         return resultList;
       } catch (e) {
         throw Exception('Failed to decode board list');
       }
     } else {
       throw Exception('Failed to load board list');
+    }
+  }
+
+  Future<List<Map<String, dynamic>>> _searchBoards(String keyword) async {
+    final url = Uri.parse('http://10.0.2.2:8010/api/searchBoards/$keyword');
+    final response = await http.post(url);
+    if (response.statusCode == 200) {
+      final jsonData = jsonDecode(response.body);
+      final List<Map<String, dynamic>> boardList =
+          (jsonData['Data'] as List).cast<Map<String, dynamic>>();
+      return boardList;
+    } else {
+      throw Exception('Failed to load data');
+    }
+  }
+
+  Future<void> _deleteBoard(int boardId) async {
+    final url = Uri.parse('http://10.0.2.2:8010/api/deleteBoard/$boardId');
+    final response = await http.delete(url);
+    if (response.statusCode == 200) {
+// Success
+      print('Board deleted successfully');
+    } else {
+// Error
+      print('Failed to delete board. Error: ${response.reasonPhrase}');
+    }
+  }
+
+  void _onSearch(String keyword) async {
+    if (keyword.isNotEmpty) {
+      final result = await _searchBoards(keyword);
+      setState(() {
+        _searchKeyword = keyword;
+        _searchResult = result;
+      });
+    } else {
+      setState(() {
+        _searchKeyword = '';
+        _searchResult = [];
+      });
     }
   }
 
@@ -119,6 +117,7 @@ class _BoardScreenState extends State<BoardScreen> {
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: TextField(
+              onChanged: (value) => _onSearch(value),
               decoration: InputDecoration(
                 hintText: 'Enter board name',
                 contentPadding: const EdgeInsets.symmetric(
@@ -137,7 +136,7 @@ class _BoardScreenState extends State<BoardScreen> {
           ),
           Expanded(
             child: FutureBuilder<List<Map<String, dynamic>>>(
-              future: _boardListFuture,
+              future: _searchBoards(_searchKeyword),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Center(child: CircularProgressIndicator());
@@ -148,16 +147,16 @@ class _BoardScreenState extends State<BoardScreen> {
                   List<Map<String, dynamic>> mapList = boardList;
                   return ListView.separated(
                     itemBuilder: (BuildContext context, int index) {
-                      Color labelColor =
-                          _getLabelColor(mapList[index]['LabelsColor']);
-                      // Set the same color for the label and bottom container
+                      // Build the board item widget
                       return GestureDetector(
                         onTap: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => ListScreen(
-                                    BoardName: 'Công việc ở công ty')),
+                              builder: (context) => ListScreen(
+                                BoardName: 'Công việc ở công ty',
+                              ),
+                            ),
                           );
                         },
                         child: Container(
@@ -171,17 +170,18 @@ class _BoardScreenState extends State<BoardScreen> {
                               ),
                             ],
                           ),
-                          // add image to the label and bottom container
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
+                              // Add image to the label and bottom container
                               Container(
                                 width: double.infinity,
                                 height: 100,
                                 decoration: BoxDecoration(
                                   image: DecorationImage(
                                     image: _getImageLabel(
-                                        'assets/images/background/background_${mapList[index]['Labels']}.jpg'),
+                                      'assets/images/background/background_${mapList[index]['Labels']}.jpg',
+                                    ),
                                     fit: BoxFit.cover,
                                   ),
                                   borderRadius: BorderRadius.only(
@@ -189,10 +189,55 @@ class _BoardScreenState extends State<BoardScreen> {
                                     topRight: Radius.circular(8),
                                   ),
                                 ),
+                                child: Align(
+                                  alignment: Alignment.topRight,
+                                  child: IconButton(
+                                    icon: Icon(Icons.delete_outline),
+                                    onPressed: () {
+                                      showDialog(
+                                        context: context,
+                                        builder: (BuildContext context) {
+                                          return AlertDialog(
+                                            title: Text('Confirm'),
+                                            content: Text(
+                                              'Are you sure you want to delete this board?',
+                                            ),
+                                            actions: <Widget>[
+                                              TextButton(
+                                                child: Text('Cancel'),
+                                                onPressed: () {
+                                                  Navigator.of(context).pop();
+                                                },
+                                              ),
+                                              TextButton(
+                                                child: Text('Delete'),
+                                                onPressed: () async {
+                                                  // TODO: delete board
+                                                  await _deleteBoard(index +
+                                                      1); // call _deleteBoard function
+                                                  Navigator.of(context).pop();
+                                                  Navigator.push(
+                                                    context,
+                                                    MaterialPageRoute(
+                                                      builder: (context) =>
+                                                          Board(),
+                                                    ),
+                                                  );
+                                                },
+                                              ),
+                                            ],
+                                          );
+                                        },
+                                      );
+                                    },
+                                  ),
+                                ),
                               ),
                               Padding(
                                 padding: const EdgeInsets.symmetric(
-                                    vertical: 16, horizontal: 24),
+                                  vertical: 16,
+                                  horizontal: 24,
+                                ),
                                 child: Column(
                                   crossAxisAlignment: CrossAxisAlignment.start,
                                   children: [
@@ -203,7 +248,9 @@ class _BoardScreenState extends State<BoardScreen> {
                                           height: 20,
                                           margin: EdgeInsets.only(right: 8),
                                           decoration: BoxDecoration(
-                                            color: labelColor,
+                                            color: _getLabelColor(
+                                              mapList[index]['LabelsColor'],
+                                            ),
                                             borderRadius:
                                                 BorderRadius.circular(4),
                                           ),
