@@ -1,3 +1,4 @@
+import 'package:demo/board_manager.dart';
 import 'package:flutter/material.dart';
 import 'board_screen.dart';
 import 'background_item.dart';
@@ -215,7 +216,7 @@ class _CreateScreenState extends State<CreateScreen>
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => BoardScreen(),
+                          builder: (context) => Board(),
                         ),
                       );
                     },

@@ -13,7 +13,7 @@ class BoardScreen extends StatefulWidget {
 }
 
 class _BoardScreenState extends State<BoardScreen> {
-  String _searchKeyword = 'c';
+  String _searchKeyword = "";
   late Future<List<Map<String, dynamic>>> _boardListFuture;
   List<Map<String, dynamic>> _searchResult = [];
   @override
@@ -136,7 +136,9 @@ class _BoardScreenState extends State<BoardScreen> {
           ),
           Expanded(
             child: FutureBuilder<List<Map<String, dynamic>>>(
-              future: _searchBoards(_searchKeyword),
+              future: _searchKeyword.isEmpty
+                  ? _boardListFuture
+                  : _searchBoards(_searchKeyword),
               builder: (context, snapshot) {
                 if (snapshot.connectionState == ConnectionState.waiting) {
                   return Center(child: CircularProgressIndicator());
@@ -213,8 +215,9 @@ class _BoardScreenState extends State<BoardScreen> {
                                                 child: Text('Delete'),
                                                 onPressed: () async {
                                                   // TODO: delete board
-                                                  await _deleteBoard(index +
-                                                      1); // call _deleteBoard function
+                                                  await _deleteBoard(mapList[
+                                                          index][
+                                                      'BoardID']); // call _deleteBoard function
                                                   Navigator.of(context).pop();
                                                   Navigator.push(
                                                     context,
