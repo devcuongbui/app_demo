@@ -35,40 +35,55 @@ class _BoardState extends State<Board> {
     return Scaffold(
       appBar: _showAppBar
           ? AppBar(
-              automaticallyImplyLeading: false,
-              title: _currentIndex == 0
-                  ? Row(
-                      mainAxisAlignment: MainAxisAlignment.start,
-                      children: [
-                        SizedBox(width: 120),
-                        Image.asset(
-                          'assets/images/trello_logo.png',
-                          height: 28,
-                        ),
-                        SizedBox(width: 8),
-                        Text(
-                          'My App',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
+              backgroundColor: Colors.blue,
+              elevation: 0,
+              flexibleSpace: SafeArea(
+                child: Flex(
+                  direction: Axis.horizontal,
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    IconButton(
+                      icon: Icon(Icons.arrow_back),
+                      onPressed: () {
+                        // Handle back button press
+                      },
+                      color: Colors.transparent, // Set color to transparent
+                    ),
+                    Expanded(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Image.asset(
+                            'assets/images/trello_logo.png',
+                            height: 28,
                           ),
-                        ),
-                        SizedBox(width: 92),
-                        IconButton(
-                          icon: Icon(Icons.add),
-                          onPressed: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => CreateScreen(),
-                              ),
-                            );
-                          },
-                        ),
-                      ],
-                    )
-                  : Text(''),
-              actions: [],
+                          SizedBox(width: 8),
+                          Text(
+                            'My App',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      icon: Icon(Icons.add),
+                      color: Colors.white, // Set color to white
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => CreateScreen(),
+                          ),
+                        );
+                      },
+                    ),
+                  ],
+                ),
+              ),
             )
           : null,
       body: _children[_currentIndex],

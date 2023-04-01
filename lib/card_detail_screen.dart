@@ -1,13 +1,17 @@
 import 'package:demo/checklist_screen.dart';
+import 'package:demo/my_cards_screen.dart';
 import 'package:flutter/material.dart';
 import 'icon_label.dart';
 import 'checklist_screen_show.dart';
 import 'comment_screen.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class CardsDetailScreen extends StatefulWidget {
   final String cardName;
+  final int cardID;
 
-  CardsDetailScreen(this.cardName);
+  CardsDetailScreen(this.cardName, this.cardID);
 
   @override
   _CardsDetailScreenState createState() => _CardsDetailScreenState();
@@ -38,6 +42,26 @@ class _CardsDetailScreenState extends State<CardsDetailScreen> {
 
   String _comment = "test comment";
 
+  Future<void> _updateCard(int cardID) async {
+    final url = Uri.parse('http://10.0.2.2:8010/api/updateCard/$cardID');
+    final response = await http.put(
+      url,
+      headers: <String, String>{
+        'Content-Type': 'application/json; charset=UTF-8',
+      },
+      body: jsonEncode(<String, dynamic>{
+        'dueDate': _expirationDate?.toIso8601String(),
+        'cardID': cardID,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      // Handle success
+    } else {
+      // Handle error
+    }
+  }
+
   String getColorName(Color color) {
     if (color == Colors.red) {
       return 'Red';
@@ -66,6 +90,21 @@ class _CardsDetailScreenState extends State<CardsDetailScreen> {
       child: Scaffold(
         appBar: AppBar(
           title: Text(widget.cardName),
+          actions: [
+            IconButton(
+              icon: Icon(Icons.check),
+              onPressed: () {
+                _updateCard(widget.cardID);
+                Navigator.of(context).pop();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => MyCardsScreen(),
+                  ),
+                );
+              },
+            ),
+          ],
         ),
         body: Stack(
           children: [
@@ -201,7 +240,7 @@ class _CardsDetailScreenState extends State<CardsDetailScreen> {
                       ),
                       SizedBox(height: 16.0),
                       Text(
-                        'Expiration Date:',
+                        'DueDate :',
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
                           fontSize: 18.0,

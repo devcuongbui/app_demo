@@ -340,7 +340,7 @@ class _ListScreenState extends State<ListScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => CardsDetailScreen('Front End'),
+            builder: (context) => CardsDetailScreen('Front End',1),
           ),
         );
       },

@@ -1,6 +1,9 @@
 import 'package:demo/create_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'card_detail_screen.dart';
 
 class MyCardsScreen extends StatefulWidget {
   @override
@@ -16,6 +19,32 @@ class _MyCardsScreenState extends State<MyCardsScreen> {
     'https://top10camau.vn/wp-content/uploads/2022/10/avatar-meo-cute-5.jpg',
   ];
 
+  Future<List<Map<String, dynamic>>> _fetchCardList() async {
+    final response =
+        await http.get(Uri.parse('http://10.0.2.2:8010/api/getcards'));
+    if (response.statusCode == 200) {
+      try {
+        final data = jsonDecode(response.body)['Data'];
+        final cardData = jsonDecode(data);
+        List<dynamic> cardList = [];
+        if (cardData is List) {
+          cardList = cardData;
+        } else if (cardData is Map) {
+          cardList = [cardData];
+        }
+        final resultList = cardList
+            .map((board) =>
+                Map<String, dynamic>.from(board as Map<String, dynamic>))
+            .toList();
+        return resultList;
+      } catch (e) {
+        throw Exception('Failed to decode board list');
+      }
+    } else {
+      throw Exception('Failed to load board list');
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -25,7 +54,12 @@ class _MyCardsScreenState extends State<MyCardsScreen> {
           IconButton(
             icon: Icon(Icons.add),
             onPressed: () {
-              // TODO: Implement search function
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => CreateScreen(),
+                ),
+              );
             },
           ),
         ],
@@ -80,37 +114,58 @@ class _MyCardsScreenState extends State<MyCardsScreen> {
             ),
           ),
           Expanded(
-            child: _buildCardsList(),
+            child: FutureBuilder<List<Map<String, dynamic>>>(
+              future: _fetchCardList(),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.done) {
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: Text('Failed to load card list'),
+                    );
+                  } else {
+                    final cardList = snapshot.data!;
+                    return ListView.builder(
+                      itemCount: cardList.length,
+                      itemBuilder: (context, index) {
+                        final card = cardList[index];
+                        return _buildCard(
+                          card['CardName'],
+                          card['LabelColor'],
+                          card['DueDate'] != null
+                              ? DateTime.parse(card['DueDate'])
+                              : null,
+                          card['Comment'],
+                          card['IntCheckList'],
+                          card['Checklist'],
+                          _listAvatar,
+                        );
+                      },
+                    );
+                  }
+                } else {
+                  return Center(
+                    child: CircularProgressIndicator(),
+                  );
+                }
+              },
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildCardsList() {
-    List<Widget> cards = [
-      _buildCard('Build Database', 'green',
-          DateTime.now().add(Duration(days: 3)), 2, 1, 3, _listAvatar),
-      _buildCard('Build Server', 'red', DateTime.now().add(Duration(days: 2)),
-          4, 5, 10, _listAvatar),
-      _buildCard('Build FrontEnd', 'yellow',
-          DateTime.now().add(Duration(days: 2)), 4, 7, 10, _listAvatar),
-      _buildCard('Build BackEnd', 'blue', DateTime.now().add(Duration(days: 2)),
-          4, 9, 10, _listAvatar)
-    ];
-
-    if (_filterByDate) {
-      cards =
-          cards.where((card) => card.key != ValueKey('noExpiration')).toList();
-    }
-
-    return ListView(children: cards);
-  }
-
-  Widget _buildCard(String title, String label, DateTime? expirationDate,
-      int comments, int checkedItems, int totalItems, List<String> avatars) {
+  Widget _buildCard(
+    String title,
+    String label,
+    DateTime? expirationDate,
+    int comments,
+    int checkedItems,
+    int totalItems,
+    List<String> avatars,
+  ) {
     Color rectangleColor = Colors.blue;
-    switch (label) {
+    switch (label.trim()) {
       case 'green':
         rectangleColor = Colors.green;
         break;
@@ -124,49 +179,59 @@ class _MyCardsScreenState extends State<MyCardsScreen> {
         rectangleColor = Colors.blue;
     }
 
-    return Card(
-      key: expirationDate == null
-          ? ValueKey('noExpiration')
-          : ValueKey(expirationDate),
-      child: ListTile(
-        leading: Container(
-          width: 20,
-          height: 20,
-          decoration: BoxDecoration(
-            color: rectangleColor,
-            borderRadius: BorderRadius.circular(4),
+    return GestureDetector(
+      onTap: () {
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CardsDetailScreen(title, 1),
           ),
-          alignment: Alignment.center,
-        ),
-        title: Text(title),
-        subtitle: Row(
-          children: [
-            Icon(Icons.calendar_today_outlined, size: 16),
-            SizedBox(width: 4),
-            Text(
-              expirationDate != null
-                  ? DateFormat('MMM d').format(expirationDate)
-                  : 'No expiration',
+        );
+      },
+      child: Card(
+        key: expirationDate == null
+            ? ValueKey('noExpiration')
+            : ValueKey(expirationDate),
+        child: ListTile(
+          leading: Container(
+            width: 20,
+            height: 20,
+            decoration: BoxDecoration(
+              color: rectangleColor,
+              borderRadius: BorderRadius.circular(4),
             ),
-            SizedBox(width: 8),
-            Icon(Icons.comment_outlined, size: 16),
-            SizedBox(width: 4),
-            Text('$comments'),
-            SizedBox(width: 8),
-            Icon(Icons.check_box_outlined, size: 16),
-            SizedBox(width: 4),
-            Text('$checkedItems/$totalItems'),
-          ],
-        ),
-        trailing: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            CircleAvatar(backgroundImage: NetworkImage(avatars[0])),
-            SizedBox(width: 4),
-            CircleAvatar(backgroundImage: NetworkImage(avatars[1])),
-            SizedBox(width: 4),
-            CircleAvatar(backgroundImage: NetworkImage(avatars[2])),
-          ],
+            alignment: Alignment.center,
+          ),
+          title: Text(title),
+          subtitle: Row(
+            children: [
+              Icon(Icons.calendar_today_outlined, size: 16),
+              SizedBox(width: 4),
+              Text(
+                expirationDate != null
+                    ? DateFormat('MMM d').format(expirationDate)
+                    : 'No expiration',
+              ),
+              SizedBox(width: 8),
+              Icon(Icons.comment_outlined, size: 16),
+              SizedBox(width: 4),
+              Text('$comments'),
+              SizedBox(width: 8),
+              Icon(Icons.check_box_outlined, size: 16),
+              SizedBox(width: 4),
+              Text('$checkedItems/$totalItems'),
+            ],
+          ),
+          trailing: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              CircleAvatar(backgroundImage: NetworkImage(avatars[0])),
+              SizedBox(width: 4),
+              CircleAvatar(backgroundImage: NetworkImage(avatars[1])),
+              SizedBox(width: 4),
+              CircleAvatar(backgroundImage: NetworkImage(avatars[2])),
+            ],
+          ),
         ),
       ),
     );
