@@ -7,6 +7,8 @@ import 'search_screen.dart';
 import 'board_screen.dart';
 
 class Board extends StatefulWidget {
+  final int index;
+  Board(this.index);
   @override
   _BoardState createState() => _BoardState();
 }
@@ -23,10 +25,18 @@ class _BoardState extends State<Board> {
     AccountScreen(),
   ];
 
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.index == 1 ? 1 : 0;
+    _showAppBar = _currentIndex != 1;
+  }
+
   void onTabTapped(int index) {
     setState(() {
       _currentIndex = index;
-      _showAppBar = index == 0;
+      _showAppBar =
+          index == 0; // Ẩn AppBar khi chọn tab Search, Notification và Account
     });
   }
 
@@ -42,13 +52,16 @@ class _BoardState extends State<Board> {
                   direction: Axis.horizontal,
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    IconButton(
-                      icon: Icon(Icons.arrow_back),
-                      onPressed: () {
-                        // Handle back button press
-                      },
-                      color: Colors.transparent, // Set color to transparent
-                    ),
+                    _currentIndex != 1 // Ẩn nút back khi chọn tab My Cards
+                        ? IconButton(
+                            icon: Icon(Icons.arrow_back),
+                            onPressed: () {
+                              // Handle back button press
+                            },
+                            color:
+                                Colors.transparent, // Set color to transparent
+                          )
+                        : Container(),
                     Expanded(
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,

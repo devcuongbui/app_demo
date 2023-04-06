@@ -6,6 +6,7 @@ import 'checklist_screen_show.dart';
 import 'comment_screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'board_manager.dart';
 
 class CardsDetailScreen extends StatefulWidget {
   final String cardName;
@@ -96,11 +97,10 @@ class _CardsDetailScreenState extends State<CardsDetailScreen> {
               onPressed: () {
                 _updateCard(widget.cardID);
                 Navigator.of(context).pop();
-                Navigator.push(
+                Navigator.pushAndRemoveUntil(
                   context,
-                  MaterialPageRoute(
-                    builder: (context) => MyCardsScreen(),
-                  ),
+                  MaterialPageRoute(builder: (context) => Board(1)),
+                  (route) => false, // Xoá tất cả các screen còn lại trên stack
                 );
               },
             ),

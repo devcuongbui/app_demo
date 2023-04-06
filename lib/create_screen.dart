@@ -213,11 +213,11 @@ class _CreateScreenState extends State<CreateScreen>
                   ElevatedButton(
                     onPressed: () {
                       addBoard();
-                      Navigator.push(
+                      Navigator.pushAndRemoveUntil(
                         context,
-                        MaterialPageRoute(
-                          builder: (context) => Board(),
-                        ),
+                        MaterialPageRoute(builder: (context) => Board(0)),
+                        (route) =>
+                            false, // Xoá tất cả các screen còn lại trên stack
                       );
                     },
                     child: Text('Add'),

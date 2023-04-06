@@ -223,7 +223,7 @@ class _BoardScreenState extends State<BoardScreen> {
                                                     context,
                                                     MaterialPageRoute(
                                                       builder: (context) =>
-                                                          Board(),
+                                                          Board(0),
                                                     ),
                                                   );
                                                 },
