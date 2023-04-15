@@ -3,7 +3,6 @@ import 'package:demo/my_cards_screen.dart';
 import 'package:flutter/material.dart';
 import 'icon_label.dart';
 import 'checklist_screen_show.dart';
-import 'comment_screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 import 'board_manager.dart';
@@ -155,21 +154,7 @@ class _CardsDetailScreenState extends State<CardsDetailScreen> {
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => ChecklistScreenShow(
-                                        checklistName: 'Module',
-                                        items: [
-                                          {
-                                            'name': 'build file home.html',
-                                            'isChecked': true
-                                          },
-                                          {
-                                            'name': 'build base.css',
-                                            'isChecked': true
-                                          },
-                                          {
-                                            'name': 'javascript DOM',
-                                            'isChecked': false
-                                          },
-                                        ],
+
                                       ),
                                     ),
                                   );

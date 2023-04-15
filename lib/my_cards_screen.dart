@@ -12,6 +12,7 @@ class MyCardsScreen extends StatefulWidget {
 
 class _MyCardsScreenState extends State<MyCardsScreen> {
   bool _filterByDate = true;
+  int _cardID = 1;
   DateFormat dateFormat = DateFormat('MMMM dd');
   List<String> _listAvatar = [
     'https://png.pngtree.com/png-vector/20191027/ourlarge/pngtree-cute-pug-avatar-with-a-yellow-background-png-image_1873432.jpg',
@@ -135,9 +136,10 @@ class _MyCardsScreenState extends State<MyCardsScreen> {
                               ? DateTime.parse(card['DueDate'])
                               : null,
                           card['Comment'],
-                          card['IntCheckList'],
-                          card['Checklist'],
+                          card['index_checked'],
+                          card['SUM'],
                           _listAvatar,
+                          card['CardID'], // pass cardID to _buildCard
                         );
                       },
                     );
@@ -163,6 +165,7 @@ class _MyCardsScreenState extends State<MyCardsScreen> {
     int checkedItems,
     int totalItems,
     List<String> avatars,
+    int cardID, // add cardID as a parameter
   ) {
     Color rectangleColor = Colors.blue;
     switch (label.trim()) {
@@ -184,7 +187,8 @@ class _MyCardsScreenState extends State<MyCardsScreen> {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => CardsDetailScreen(title, 1),
+            builder: (context) => CardsDetailScreen(
+                title, cardID), // pass cardID to CardsDetailScreen
           ),
         );
       },
