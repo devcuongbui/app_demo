@@ -239,11 +239,11 @@ class _MyCardsScreenState extends State<MyCardsScreen> {
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              CircleAvatar(backgroundImage: NetworkImage(avatars[0])),
+              CircleAvatar(radius: 14,backgroundImage: NetworkImage(avatars[0])),
               const SizedBox(width: 2),
-              CircleAvatar(backgroundImage: NetworkImage(avatars[1])),
+              CircleAvatar(radius: 14,backgroundImage: NetworkImage(avatars[1])),
               const SizedBox(width: 2),
-              CircleAvatar(backgroundImage: NetworkImage(avatars[2])),
+              CircleAvatar(radius: 14,backgroundImage: NetworkImage(avatars[2])),
             ],
           ),
         ),
