@@ -22,7 +22,7 @@ class _MyCardsScreenState extends State<MyCardsScreen> {
 
   Future<List<Map<String, dynamic>>> _fetchCardList() async {
     final response =
-        await http.get(Uri.parse('http://10.0.2.2:8010/api/getcards'));
+        await http.get(Uri.parse('http://192.168.1.9/api/getcards'));
     if (response.statusCode == 200) {
       try {
         final data = jsonDecode(response.body)['Data'];
@@ -194,9 +194,10 @@ class _MyCardsScreenState extends State<MyCardsScreen> {
       },
       child: Card(
         key: expirationDate == null
-            ? ValueKey('noExpiration')
+            ? const ValueKey('noExpiration')
             : ValueKey(expirationDate),
         child: ListTile(
+          minLeadingWidth: 1,
           leading: Container(
             width: 20,
             height: 20,
@@ -206,33 +207,42 @@ class _MyCardsScreenState extends State<MyCardsScreen> {
             ),
             alignment: Alignment.center,
           ),
-          title: Text(title),
-          subtitle: Row(
-            children: [
-              Icon(Icons.calendar_today_outlined, size: 16),
-              SizedBox(width: 4),
-              Text(
-                expirationDate != null
-                    ? DateFormat('MMM d').format(expirationDate)
-                    : 'No expiration',
-              ),
-              SizedBox(width: 8),
-              Icon(Icons.comment_outlined, size: 16),
-              SizedBox(width: 4),
-              Text('$comments'),
-              SizedBox(width: 8),
-              Icon(Icons.check_box_outlined, size: 16),
-              SizedBox(width: 4),
-              Text('$checkedItems/$totalItems'),
-            ],
+          title: Padding(
+            padding: const EdgeInsets.only(bottom: 5),
+            child: Text(
+              title,
+            ),
+          ),
+          subtitle: SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Icon(Icons.calendar_today_outlined, size: 16),
+                const SizedBox(width: 4),
+                Text(
+                  expirationDate != null
+                      ? DateFormat('MMM d').format(expirationDate)
+                      : 'No expiration',
+                ),
+                const SizedBox(width: 8),
+                const Icon(Icons.comment_outlined, size: 16),
+                const SizedBox(width: 4),
+                Text('$comments'),
+                const SizedBox(width: 8),
+                const Icon(Icons.check_box_outlined, size: 16),
+                const SizedBox(width: 4),
+                Text('$checkedItems/$totalItems'),
+              ],
+            ),
           ),
           trailing: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
               CircleAvatar(backgroundImage: NetworkImage(avatars[0])),
-              SizedBox(width: 4),
+              const SizedBox(width: 2),
               CircleAvatar(backgroundImage: NetworkImage(avatars[1])),
-              SizedBox(width: 4),
+              const SizedBox(width: 2),
               CircleAvatar(backgroundImage: NetworkImage(avatars[2])),
             ],
           ),

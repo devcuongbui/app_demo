@@ -43,7 +43,7 @@ class _CardsDetailScreenState extends State<CardsDetailScreen> {
   String _comment = "test comment";
 
   Future<void> _updateCard(int cardID) async {
-    final url = Uri.parse('http://10.0.2.2:8010/api/updateCard/$cardID');
+    final url = Uri.parse('http://192.168.1.9/api/updateCard/$cardID');
     final response = await http.put(
       url,
       headers: <String, String>{

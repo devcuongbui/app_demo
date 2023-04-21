@@ -42,7 +42,7 @@ class _CreateScreenState extends State<CreateScreen>
 
     // call the API to add the new board
     final response = await http.post(
-      Uri.parse('http://10.0.2.2:8010/api/addBoard'),
+      Uri.parse('http://192.168.1.9/api/addBoard'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode(newBoard.toJson()),
     );
@@ -78,7 +78,7 @@ class _CreateScreenState extends State<CreateScreen>
             appBar: AppBar(
               title: Text('Create'),
               // controller: controller,
-              bottom: TabBar(
+              bottom: const TabBar(
                 tabs: [
                   Tab(text: 'Board'),
                   Tab(text: 'Card'),
@@ -86,160 +86,164 @@ class _CreateScreenState extends State<CreateScreen>
               ),
             ),
             body: TabBarView(children: [
-              // Board section
-              Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: 16.0),
-                  Text(
-                    'Board Name',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20.0,
+              SingleChildScrollView(
+                padding: const EdgeInsets.symmetric(vertical: 8,horizontal: 12),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const SizedBox(height: 16.0),
+                    const Text(
+                      'Board Name',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20.0,
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 8.0),
-                  TextField(
-                    onChanged: (value) {
-                      setState(() {
-                        _boardName = value;
-                      });
-                    },
-                    decoration: InputDecoration(
-                      border: OutlineInputBorder(),
-                      hintText: 'Enter board name',
+                    const SizedBox(height: 8.0),
+                    TextField(
+                      onChanged: (value) {
+                        setState(() {
+                          _boardName = value;
+                        });
+                      },
+                      decoration: const InputDecoration(
+                        border: OutlineInputBorder(),
+                        hintText: 'Enter board name',
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 16.0),
-                  Text(
-                    'Board Color',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20.0,
+                    const SizedBox(height: 16.0),
+                    const Text(
+                      'Board Color',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20.0,
+                      ),
                     ),
-                  ),
-                  SizedBox(height: 8.0),
-                  DropdownButtonFormField<String>(
-                    value: _boardColor,
-                    items: <String>[
-                      'Blue',
-                      'Green',
-                      'Red',
-                      'Yellow',
-                      'Custom',
-                    ].map<DropdownMenuItem<String>>(
-                      (String value) {
-                        return DropdownMenuItem<String>(
-                          value: value,
-                          child: Text(value),
+                    const SizedBox(height: 8.0),
+                    DropdownButtonFormField<String>(
+                      value: _boardColor,
+                      items: <String>[
+                        'Blue',
+                        'Green',
+                        'Red',
+                        'Yellow',
+                        'Custom',
+                      ].map<DropdownMenuItem<String>>(
+                        (String value) {
+                          return DropdownMenuItem<String>(
+                            value: value,
+                            child: Text(value),
+                          );
+                        },
+                      ).toList(),
+                      onChanged: (value) {
+                        setState(() {
+                          _boardColor = value!;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 16.0),
+                    const Text(
+                      'Background Image',
+                      style: TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 20.0,
+                      ),
+                    ),
+                    const SizedBox(height: 8.0),
+                    DropdownButton<String>(
+                      key: UniqueKey(),
+                      value: _backgroundImage,
+                      onChanged: (value) {
+                        setState(() {
+                          _backgroundImage = value!;
+                        });
+                      },
+                      items: [
+                        DropdownMenuItem<String>(
+                          value: '0',
+                          child: BackgroundItem(
+                            value: 'background_0.jpg',
+                            text: 'Background 1',
+                            image: 'background_0.jpg',
+                          ),
+                        ),
+                        DropdownMenuItem<String>(
+                          value: '1',
+                          child: BackgroundItem(
+                            value: 'background_1.jpg',
+                            text: 'Background 2',
+                            image: 'background_1.jpg',
+                          ),
+                        ),
+                        DropdownMenuItem<String>(
+                          value: '2',
+                          child: BackgroundItem(
+                            value: 'background_2.jpg',
+                            text: 'Background 3',
+                            image: 'background_2.jpg',
+                          ),
+                        ),
+                        DropdownMenuItem<String>(
+                          value: '3',
+                          child: BackgroundItem(
+                            value: 'background_3.jpg',
+                            text: 'Background 4',
+                            image: 'background_3.jpg',
+                          ),
+                        ),
+                        DropdownMenuItem<String>(
+                          value: '4',
+                          child: BackgroundItem(
+                            value: 'background_4.jpg',
+                            text: 'Background 5',
+                            image: 'background_4.jpg',
+                          ),
+                        ),
+                        DropdownMenuItem<String>(
+                          value: '9',
+                          child: BackgroundItem(
+                            value: 'background_9.jpg',
+                            text: 'Background 6',
+                            image: 'background_9.jpg',
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 16.0),
+                    ElevatedButton(
+                      onPressed: () {
+                        addBoard();
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (context) => Board(0)),
+                          (route) =>
+                              false, // Xoá tất cả các screen còn lại trên stack
                         );
                       },
-                    ).toList(),
-                    onChanged: (value) {
-                      setState(() {
-                        _boardColor = value!;
-                      });
-                    },
-                  ),
-                  SizedBox(height: 16.0),
-                  Text(
-                    'Background Image',
-                    style: TextStyle(
-                      fontWeight: FontWeight.bold,
-                      fontSize: 20.0,
+                      child: Text('Add'),
                     ),
-                  ),
-                  SizedBox(height: 8.0),
-                  DropdownButton<String>(
-                    key: UniqueKey(),
-                    value: _backgroundImage,
-                    onChanged: (value) {
-                      setState(() {
-                        _backgroundImage = value!;
-                      });
-                    },
-                    items: [
-                      DropdownMenuItem<String>(
-                        value: '0',
-                        child: BackgroundItem(
-                          value: 'background_0.jpg',
-                          text: 'Background 1',
-                          image: 'background_0.jpg',
-                        ),
-                      ),
-                      DropdownMenuItem<String>(
-                        value: '1',
-                        child: BackgroundItem(
-                          value: 'background_1.jpg',
-                          text: 'Background 2',
-                          image: 'background_1.jpg',
-                        ),
-                      ),
-                      DropdownMenuItem<String>(
-                        value: '2',
-                        child: BackgroundItem(
-                          value: 'background_2.jpg',
-                          text: 'Background 3',
-                          image: 'background_2.jpg',
-                        ),
-                      ),
-                      DropdownMenuItem<String>(
-                        value: '3',
-                        child: BackgroundItem(
-                          value: 'background_3.jpg',
-                          text: 'Background 4',
-                          image: 'background_3.jpg',
-                        ),
-                      ),
-                      DropdownMenuItem<String>(
-                        value: '4',
-                        child: BackgroundItem(
-                          value: 'background_4.jpg',
-                          text: 'Background 5',
-                          image: 'background_4.jpg',
-                        ),
-                      ),
-                      DropdownMenuItem<String>(
-                        value: '9',
-                        child: BackgroundItem(
-                          value: 'background_9.jpg',
-                          text: 'Background 6',
-                          image: 'background_9.jpg',
-                        ),
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 16.0),
-                  ElevatedButton(
-                    onPressed: () {
-                      addBoard();
-                      Navigator.pushAndRemoveUntil(
-                        context,
-                        MaterialPageRoute(builder: (context) => Board(0)),
-                        (route) =>
-                            false, // Xoá tất cả các screen còn lại trên stack
-                      );
-                    },
-                    child: Text('Add'),
-                  ),
-                ],
+                  ],
+                ),
+
               ),
+              // Board section
 
               // Card section
               SingleChildScrollView(
-                  padding: EdgeInsets.all(16.0),
+                  padding: const EdgeInsets.all(16.0),
                   child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        SizedBox(height: 16.0),
-                        Text(
+                        const SizedBox(height: 16.0),
+                        const Text(
                           'Card List',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 20.0,
                           ),
                         ),
-                        SizedBox(height: 8.0),
+                        const SizedBox(height: 8.0),
                         DropdownButtonFormField<String>(
                           value: null,
                           items: <String>['List 1', 'List 2', 'List 3']
@@ -250,20 +254,20 @@ class _CreateScreenState extends State<CreateScreen>
                             );
                           }).toList(),
                           onChanged: (value) {},
-                          decoration: InputDecoration(
+                          decoration: const InputDecoration(
                             border: OutlineInputBorder(),
                             hintText: 'Select a list',
                           ),
                         ),
-                        SizedBox(height: 16.0),
-                        Text(
+                        const SizedBox(height: 16.0),
+                        const Text(
                           'Card Name',
                           style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 20.0,
                           ),
                         ),
-                        SizedBox(height: 8.0),
+                        const SizedBox(height: 8.0),
                         TextField(
                           onChanged: (value) {
                             setState(() {
