@@ -335,48 +335,6 @@ class _CreateScreenState extends State<CreateScreen>
                             hintText: 'Enter expiration date',
                           ),
                         ),
-                        SizedBox(height: 16.0),
-                        Text(
-                          'Members',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20.0,
-                          ),
-                        ),
-                        SizedBox(height: 8.0),
-                        TextField(
-                          onChanged: (value) {
-                            setState(() {
-                              myStringList.add(value);
-                              _members = myStringList;
-                            });
-                          },
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            hintText: 'Enter members',
-                          ),
-                        ),
-                        SizedBox(height: 16.0),
-                        Text(
-                          'Attachments',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 20.0,
-                          ),
-                        ),
-                        SizedBox(height: 8.0),
-                        TextField(
-                          onChanged: (value) {
-                            setState(() {
-                              myStringList.add(value);
-                              _attachments = myStringList;
-                            });
-                          },
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            hintText: 'Enter attachments',
-                          ),
-                        ),
                       ]))
             ])));
   }

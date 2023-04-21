@@ -149,27 +149,19 @@ class _CardsDetailScreenState extends State<CardsDetailScreen> {
                           Column(
                             children: [
                               IconButton(
+                                icon: Icon(Icons.format_list_numbered_sharp),
                                 onPressed: () {
-                                  Navigator.push(
+                                  _updateCard(widget.cardID);
+                                  Navigator.of(context).pop();
+                                  Navigator.pushAndRemoveUntil(
                                     context,
                                     MaterialPageRoute(
                                       builder: (context) => ChecklistScreenShow(
-
-                                      ),
+                                          cardID: widget.cardID),
                                     ),
+                                    (route) => false,
                                   );
                                 },
-                                icon: Stack(
-                                  alignment: Alignment.center,
-                                  children: [
-                                    Icon(Icons.featured_play_list),
-                                    Text(
-                                      '3/5', // replace with actual values of checked and total items
-                                      style: TextStyle(fontSize: 12),
-                                    ),
-                                  ],
-                                ),
-                                tooltip: 'Add Checklist',
                               ),
                               Text('Checklist'),
                             ],

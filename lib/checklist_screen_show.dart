@@ -1,73 +1,111 @@
 import 'package:flutter/material.dart';
+import 'my_cards_screen.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class ChecklistScreenShow extends StatefulWidget {
+  final int cardID;
+
+  ChecklistScreenShow({
+    required this.cardID,
+  });
+
   @override
   _ChecklistScreenState createState() => _ChecklistScreenState();
 }
 
 class _ChecklistScreenState extends State<ChecklistScreenShow> {
-  final String checklistTitle = "null";
-  final String title = "null";
-
-  final List<ChecklistItem> _items = <ChecklistItem>[];
+  final _items = <Map<String, dynamic>>[];
   final _itemNameController = TextEditingController();
   final _itemNameFocusNode = FocusNode();
   bool _isAddingNewItem = false;
   String _checklistName = '';
+  int _checklistID = 0;
   bool _isEditingName = false;
   bool? _isCheckedFilter = null;
 
   @override
   void initState() {
     super.initState();
-    _fetchChecklistItems(); // Thay vì addAll ở đây, gọi hàm lấy dữ liệu từ API
-  }
-
-  @override
-  void dispose() {
-    _itemNameController.dispose();
-    _itemNameFocusNode.dispose();
-    super.dispose();
-  }
-
-  ChecklistItem _createChecklistItemFromJson(Map<String, dynamic> json) {
-    return ChecklistItem(
-      checklistTitle: json['ChecklistTitle'],
-      title: json['Title'],
-    );
+    _fetchChecklistItems();
+    _isAddingNewItem = false;
   }
 
   Future<void> _fetchChecklistItems() async {
-    final response =
-        await http.get(Uri.parse('http://10.0.2.2:8010/api/getChecklists'));
-    final jsonList = json.decode(response.body)['Data'];
+    final response = await http.get(
+        Uri.parse('http://10.0.2.2:8010/api/getChecklists/${widget.cardID}'));
+    final String jsonData = json.decode(response.body)['Data'];
+    final List<dynamic> data = json.decode(jsonData);
 
-    final List<ChecklistItem> items =
-        jsonList.map((json) => _createChecklistItemFromJson(json)).toList();
+    if (data is List) {
+      final List<Map<String, dynamic>> items =
+          List<Map<String, dynamic>>.from(data);
+      setState(() {
+        _checklistID = items[0]['ChecklistID'];
+        _checklistName = items[0]['ChecklistTitle'];
+        _items.addAll(items.map((item) => {
+              'title': item['Title'],
+              'isChecked': item['IsChecked'] ?? false,
+            }));
+      });
+    }
+  }
 
-    setState(() {
-      _checklistName =
-          jsonList[0]['ChecklistTitle']; // Lấy tên danh sách kiểm tra từ API
-      _items.addAll(items); // Thêm các mục kiểm tra từ API vào danh sách
-    });
+  Future<void> _deleteChecklistitem(String itemName) async {
+    final url =
+        Uri.parse('http://10.0.2.2:8010/api/deleteChecklistitem/$itemName');
+    final response = await http.delete(url);
+    if (response.statusCode == 200) {
+      // Success
+      print('Item deleted successfully');
+    } else {
+      // Error
+      print('Failed to delete item. Error: ${response.reasonPhrase}');
+    }
+  }
+
+  Future<void> addCheckListItem(String itemName) async {
+    // create a new CheckListItemModel object with data from form
+    CheckListItemModel newItem = CheckListItemModel(
+      checklistID: _checklistID,
+      title: itemName,
+    );
+
+    // call the API to add the new checklist item
+    final response = await http.post(
+      Uri.parse('http://10.0.2.2:8010/api/addChecklistitem'),
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode(newItem.toJson()),
+    );
+
+    // check if the request was successful
+    if (response.statusCode == 200) {
+      // show success message to the user
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Checklist item added successfully!')),
+      );
+    } else {
+      // show error message to the user
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Error adding checklist item!')),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
 // Define a variable to store the filtered items
-    List<ChecklistItem> filteredItems = [];
+    List<Map<String, dynamic>> filteredItems = [];
     if (_isCheckedFilter == true) {
       filteredItems = _items
-          .where((item) => item.isChecked)
-          .toList(); // Hiển thị các mục đã đánh dấu
+          .where((item) => item['isChecked'])
+          .toList(); // displays checked items only
     } else if (_isCheckedFilter == false) {
       filteredItems = _items
-          .where((item) => !item.isChecked)
-          .toList(); // Hiển thị các mục chưa đánh dấu
+          .where((item) => !item['isChecked'])
+          .toList(); // displays unchecked items only
     } else {
-      filteredItems = List.from(_items); // Hiển thị tất cả các mục
+      filteredItems = List.from(_items); // displays all items
     }
     return Scaffold(
       appBar: AppBar(
@@ -160,7 +198,12 @@ class _ChecklistScreenState extends State<ChecklistScreenShow> {
                 ),
                 ElevatedButton(
                   onPressed: () {
-                    Navigator.pop(context);
+                    Navigator.pushAndRemoveUntil(
+                      context,
+                      MaterialPageRoute(builder: (context) => MyCardsScreen()),
+                      (route) =>
+                          false, // Xoá tất cả các screen còn lại trên stack
+                    );
                   },
                   child: Text('Cancel'),
                   style: ElevatedButton.styleFrom(
@@ -175,14 +218,14 @@ class _ChecklistScreenState extends State<ChecklistScreenShow> {
     );
   }
 
-  Widget _buildChecklistItem(int index, ChecklistItem item) {
-    bool isChecked = item.isChecked ?? false;
+  Widget _buildChecklistItem(int index, Map<String, dynamic> item) {
+    bool isChecked = item['isChecked'] ?? false;
     return Padding(
       padding: EdgeInsets.only(bottom: 8.0),
       child: GestureDetector(
         onTap: () {
           setState(() {
-            // item.isEditable = true;
+            item['isEditable'] = true;
           });
         },
         child: Row(
@@ -191,52 +234,53 @@ class _ChecklistScreenState extends State<ChecklistScreenShow> {
               value: isChecked,
               onChanged: (value) {
                 setState(() {
-                  // item.isChecked = value;
+                  item['isChecked'] = value;
                 });
               },
             ),
-            // Expanded(
-            //   child: item.isEditable == true
-            //       ? Row(
-            //           children: [
-            //             Expanded(
-            //               child: TextFormField(
-            //                 initialValue: item.title,
-            //                 autofocus: true,
-            //                 onChanged: (value) {
-            //                   setState(() {
-            //                     item.title = value;
-            //                   });
-            //                 },
-            //               ),
-            //             ),
-            //             IconButton(
-            //               icon: Icon(Icons.done),
-            //               onPressed: () {
-            //                 setState(() {
-            //                   // item.isEditable = false;
-            //                 });
-            //               },
-            //             ),
-            //             IconButton(
-            //               icon: Icon(Icons.delete),
-            //               onPressed: () {
-            //                 setState(() {
-            //                   _items.removeAt(index);
-            //                 });
-            //               },
-            //             ),
-            //           ],
-            //         )
-            //       : Text(
-            //           '${item.title}',
-            //           style: isChecked
-            //               ? TextStyle(
-            //                   decoration: TextDecoration.lineThrough,
-            //                 )
-            //               : TextStyle(),
-            //         ),
-            // ),
+            Expanded(
+              child: item['isEditable'] == true
+                  ? Row(
+                      children: [
+                        Expanded(
+                          child: TextFormField(
+                            initialValue: item['title'],
+                            autofocus: true,
+                            onChanged: (value) {
+                              setState(() {
+                                item['title'] = value;
+                              });
+                            },
+                          ),
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.done),
+                          onPressed: () {
+                            setState(() {
+                              item['isEditable'] = false;
+                            });
+                          },
+                        ),
+                        IconButton(
+                          icon: Icon(Icons.delete),
+                          onPressed: () async {
+                            setState(() {
+                              _items.removeAt(index);
+                            });
+                            await _deleteChecklistitem(item['title']);
+                          },
+                        ),
+                      ],
+                    )
+                  : Text(
+                      '${item['title']}',
+                      style: isChecked
+                          ? TextStyle(
+                              decoration: TextDecoration.lineThrough,
+                            )
+                          : TextStyle(),
+                    ),
+            ),
           ],
         ),
       ),
@@ -279,14 +323,14 @@ class _ChecklistScreenState extends State<ChecklistScreenShow> {
                 focusNode: _itemNameFocusNode,
                 autofocus: true,
                 onSubmitted: (value) {
-                  // _addItem(value);
+                  _addItem(value);
                 },
               ),
             ),
             IconButton(
               icon: Icon(Icons.done),
               onPressed: () {
-                // _addItem(_itemNameController.text);
+                _addItem(_itemNameController.text);
               },
             ),
             IconButton(
@@ -306,40 +350,47 @@ class _ChecklistScreenState extends State<ChecklistScreenShow> {
     );
   }
 
-//   void _addItem(String itemName) {
-//     if (itemName.isNotEmpty) {
-//       setState(() {
-//         _items.add(ChecklistItem(title: itemName));
-//         _itemNameController.clear();
-//         _isAddingNewItem = false;
-//         _itemNameFocusNode.unfocus();
-//       });
-//       // Scroll to the added item
-//       WidgetsBinding.instance?.addPostFrameCallback((_) {
-//         final RenderBox box = context.findRenderObject() as RenderBox;
-//         final double distance =
-//             box.size.height - box.localToGlobal(Offset.zero).dy;
-//         if (distance > 0) {
-//           Scrollable.ensureVisible(context,
-//               duration: Duration(milliseconds: 500), curve: Curves.easeIn);
-//         }
-//       });
-//     }
-//   }
-// }
+  void _addItem(String itemName) async {
+    if (itemName.isNotEmpty) {
+      // add new item to the API
+      await addCheckListItem(itemName);
+
+      // fetch updated list from the API
+      await _fetchChecklistItems();
+
+      // add new item to the local list
+      setState(() {
+        // _items.add({'name': itemName, 'isChecked': false});
+        _itemNameController.clear();
+        _isAddingNewItem = false;
+        _itemNameFocusNode.unfocus();
+      });
+
+      // Scroll to the added item
+      WidgetsBinding.instance?.addPostFrameCallback((_) {
+        final RenderBox box = context.findRenderObject() as RenderBox;
+        final double distance =
+            box.size.height - box.localToGlobal(Offset.zero).dy;
+        if (distance > 0) {
+          Scrollable.ensureVisible(context,
+              duration: Duration(milliseconds: 500), curve: Curves.easeIn);
+        }
+      });
+    }
+  }
 }
 
-class ChecklistItem {
-  String checklistTitle;
-  String title;
-  bool _isChecked;
+class CheckListItemModel {
+  final int checklistID;
+  final String title;
 
-  ChecklistItem(
-      {required this.checklistTitle,
-      required this.title,
-      bool isChecked = false})
-      : _isChecked = isChecked;
+  CheckListItemModel({
+    required this.checklistID,
+    required this.title,
+  });
 
-  bool get isChecked => _isChecked;
-  set isChecked(bool value) => _isChecked = value;
+  Map<String, dynamic> toJson() => {
+        'ChecklistID': checklistID,
+        'Title': title,
+      };
 }
