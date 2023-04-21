@@ -24,7 +24,7 @@ class _BoardScreenState extends State<BoardScreen> {
 
   Future<List<Map<String, dynamic>>> _fetchBoardList() async {
     final response =
-        await http.get(Uri.parse('http://10.0.2.2:8010/api/getboards'));
+        await http.get(Uri.parse('http://192.168.1.9/api/getboards'));
     if (response.statusCode == 200) {
       try {
         final data = jsonDecode(response.body)['Data'];
@@ -49,7 +49,7 @@ class _BoardScreenState extends State<BoardScreen> {
   }
 
   Future<List<Map<String, dynamic>>> _searchBoards(String keyword) async {
-    final url = Uri.parse('http://10.0.2.2:8010/api/searchBoards/$keyword');
+    final url = Uri.parse('http://192.168.1.9/api/searchBoards/$keyword');
     final response = await http.post(url);
     if (response.statusCode == 200) {
       final jsonData = jsonDecode(response.body);
@@ -62,7 +62,7 @@ class _BoardScreenState extends State<BoardScreen> {
   }
 
   Future<void> _deleteBoard(int boardId) async {
-    final url = Uri.parse('http://10.0.2.2:8010/api/deleteBoard/$boardId');
+    final url = Uri.parse('http://192.168.1.9/api/deleteBoard/$boardId');
     final response = await http.delete(url);
     if (response.statusCode == 200) {
 // Success
