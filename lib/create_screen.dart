@@ -42,7 +42,7 @@ class _CreateScreenState extends State<CreateScreen>
 
     // call the API to add the new board
     final response = await http.post(
-      Uri.parse('http://192.168.1.9/api/addBoard'),
+      Uri.parse('http://10.0.2.2:8010/api/addBoard'),
       headers: {'Content-Type': 'application/json'},
       body: json.encode(newBoard.toJson()),
     );

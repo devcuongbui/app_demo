@@ -28,7 +28,7 @@ class _LoginScreenState extends State<LoginScreen> {
   Future<Map<String, dynamic>> getUserList() async {
     // Change this line
     final response =
-        await http.get(Uri.parse('http://192.168.1.9/api/getAccount'));
+        await http.get(Uri.parse('http://10.0.2.2:8010/api/getAccount'));
     if (response.statusCode == 200) {
       setState(() {
         userList = jsonDecode(response.body);

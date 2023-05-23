@@ -35,6 +35,13 @@ class SearchScreen extends StatelessWidget {
               // TODO: Open corresponding page or action
             },
           );
+          return ListTile(
+            leading: Icon(Icons.account_circle),
+            title: Text('Result ${index + 1}'),
+            onTap: () {
+              // TODO: Open corresponding page or action
+            },
+          );
         },
       ),
     );

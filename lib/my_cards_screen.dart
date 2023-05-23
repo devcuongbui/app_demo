@@ -22,7 +22,7 @@ class _MyCardsScreenState extends State<MyCardsScreen> {
 
   Future<List<Map<String, dynamic>>> _fetchCardList() async {
     final response =
-        await http.get(Uri.parse('http://192.168.1.9/api/getcards'));
+        await http.get(Uri.parse('http://10.0.2.2:8010/api/getcards'));
     if (response.statusCode == 200) {
       try {
         final data = jsonDecode(response.body)['Data'];
